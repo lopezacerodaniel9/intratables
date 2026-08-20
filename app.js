@@ -1209,7 +1209,7 @@ window.togglePagoInvitado = function(id) {
   if (!currentUser) return openModalAuth();
   const inv = db.invitados.find(i => i.id === id);
   if (inv) {
-    inv.estado = 'pagado';
+    inv.estado = inv.estado === 'pagado' ? 'pendiente' : 'pagado';
     saveData();
   }
 };
