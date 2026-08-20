@@ -220,7 +220,7 @@
             <input type="text" id="search-socios" class="ios-search-input" placeholder="🔍 Buscar peñista por nombre...">
             <div class="ios-segmented-control">
               <button class="ios-segment active" data-filter-socio="todos">Todos</button>
-              <button class="ios-segment" data-filter-socio="pendiente">Deudores</button>
+              <button class="ios-segment" data-filter-socio="pendiente">Falta por Pagar</button>
               <button class="ios-segment" data-filter-socio="pagado">Pagados</button>
             </div>
             <button class="ios-btn-action admin-only" id="btn-add-socio">+ Peñista</button>
@@ -233,10 +233,9 @@
                   <tr>
                     <th>#</th>
                     <th>Nombre Peñista</th>
-                    <th>Cuota</th>
-                    <th>Pagado</th>
-                    <th>Falta Pagar</th>
-                    <th>Estado</th>
+                    <th>Cuota Asignada</th>
+                    <th>Importe Pagado</th>
+                    <th>Estado Pago</th>
                     <th class="text-right">Acciones</th>
                   </tr>
                 </thead>
@@ -427,14 +426,13 @@
       <!-- Form Login -->
       <form id="form-login">
         <div class="form-group">
-          <label>Usuario:</label>
-          <input type="text" id="login-usuario" required placeholder="Ej. admin o tu nombre">
+          <label>Usuario o Nombre Completo:</label>
+          <input type="text" id="login-usuario" required placeholder="Ej. daniel.lopez o Daniel López">
         </div>
         <div class="form-group">
           <label>Contraseña:</label>
-          <input type="password" id="login-clave" required placeholder="Introduce tu contraseña">
+          <input type="password" id="login-clave" required placeholder="Introduce tu contraseña (admin1234)">
         </div>
-        <p class="ios-sub-desc" style="margin-top: 4px;">Usuario por defecto: <strong>admin</strong> | Clave: <strong>1234</strong></p>
         <div class="modal-footer">
           <button type="button" class="btn-secondary modal-cancel">Cancelar</button>
           <button type="submit" class="btn-primary">Entrar a la App</button>
@@ -488,30 +486,6 @@
         <div class="modal-footer">
           <button type="button" class="btn-secondary modal-cancel">Cancelar</button>
           <button type="submit" class="btn-primary">Guardar Peñista</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Modal Pago Socio -->
-  <div id="modal-pago-socio" class="modal-backdrop">
-    <div class="ios-modal-card">
-      <div class="ios-drag-handle"></div>
-      <div class="modal-header">
-        <h3>Anotar Pago de Peñista</h3>
-        <button class="modal-close">&times;</button>
-      </div>
-      <form id="form-pago-socio">
-        <input type="hidden" id="pago-socio-id">
-        <p>Entrega de dinero para: <strong id="pago-socio-nombre">---</strong></p>
-        <p>Falta por pagar: <strong id="pago-socio-pendiente" class="text-danger">0 €</strong></p>
-        <div class="form-group" style="margin-top: 15px;">
-          <label>Cantidad entregada hoy (€):</label>
-          <input type="number" id="pago-socio-cantidad" required min="1" step="1">
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn-secondary modal-cancel">Cancelar</button>
-          <button type="submit" class="btn-primary">Registrar Entrega</button>
         </div>
       </form>
     </div>

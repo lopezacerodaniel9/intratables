@@ -883,22 +883,6 @@ function setupFormsAndModals() {
     closeModals();
   });
 
-  // Save Pago Socio
-  document.getElementById('form-pago-socio').addEventListener('submit', e => {
-    e.preventDefault();
-    if (!currentUser) return openModalAuth();
-
-    const id = document.getElementById('pago-socio-id').value;
-    const cantidad = Number(document.getElementById('pago-socio-cantidad').value);
-
-    const socio = db.socios.find(s => s.id === id);
-    if (socio) {
-      socio.pagado = (Number(socio.pagado) || 0) + cantidad;
-      saveData();
-    }
-    closeModals();
-  });
-
   // Open Add Invitado
   document.getElementById('btn-add-invitado')?.addEventListener('click', () => {
     if (!currentUser) return openModalAuth();
@@ -1115,23 +1099,6 @@ window.openModalSocio = function(id = null) {
   }
 
   modal.classList.add('active');
-};
-
-window.openModalPagoSocio = function(id) {
-  if (!currentUser) return openModalAuth();
-
-  const s = db.socios.find(item => item.id === id);
-  if (!s) return;
-
-  document.getElementById('form-pago-socio').reset();
-  document.getElementById('pago-socio-id').value = s.id;
-  document.getElementById('pago-socio-nombre').textContent = s.nombre;
-  
-  const pend = s.cuota - s.pagado;
-  document.getElementById('pago-socio-pendiente').textContent = `${pend} €`;
-  document.getElementById('pago-socio-cantidad').value = pend > 0 ? pend : '';
-
-  document.getElementById('modal-pago-socio').classList.add('active');
 };
 
 window.deleteSocio = function(id) {
