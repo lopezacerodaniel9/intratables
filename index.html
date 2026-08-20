@@ -62,8 +62,10 @@
       <button class="nav-tab" data-tab="tab-ajustes">⚙️ Ajustes & Usuarios</button>
     </nav>
 
-    <!-- Main Content Area -->
-    <main class="ios-main-content">
+    <!-- Layout Principal con Columna Lateral de Fotos de la Peña -->
+    <div class="app-body-layout">
+      <!-- Main Content Area -->
+      <main class="ios-main-content">
 
       <!-- TAB 1: DASHBOARD & GRÁFICOS -->
       <section id="tab-dashboard" class="tab-pane active">
@@ -391,7 +393,28 @@
         </div>
       </section>
 
-    </main>
+      </main>
+
+      <!-- Sidebar Lateral con Fotos Oficiales de la Peña -->
+      <aside class="sidebar-gallery">
+        <div class="photo-sidebar-card">
+          <div class="photo-card-header">
+            <h3>📸 La Peña en Fiestas</h3>
+            <span class="badge badge-success">Almodóvar 🐂</span>
+          </div>
+          <div class="sidebar-photo-wrapper">
+            <img src="foto_pena1.jpg" alt="Peña Los Intratables con pancarta" class="sidebar-photo-img">
+          </div>
+          <div class="sidebar-photo-wrapper">
+            <img src="foto_pena2.jpg" alt="Los Intratables en la portada de la feria" class="sidebar-photo-img">
+          </div>
+          <div class="photo-caption">
+            ✨ <strong>¡Los Intratables!</strong><br>
+            Foto oficial de la peña con nuestra pancarta en la portada de la feria de Almodóvar del Campo.
+          </div>
+        </div>
+      </aside>
+    </div>
 
     <!-- iOS Bottom Navigation Tab Bar (Apple Native Feel) -->
     <nav class="ios-tab-bar">

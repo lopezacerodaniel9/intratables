@@ -120,9 +120,75 @@ body.authenticated .ios-session-banner {
   margin-bottom: 4px;
 }
 
-.peña-hero-info p {
-  font-size: 0.88rem;
-  color: #64748b;
+/* Layout Principal con Galería Lateral en PC */
+.app-body-layout {
+  width: 100%;
+}
+
+@media (min-width: 992px) {
+  .app-body-layout {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 20px;
+    align-items: start;
+  }
+}
+
+.sidebar-gallery {
+  position: sticky;
+  top: 20px;
+}
+
+.photo-sidebar-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 18px;
+  border: 1.5px solid #cbd5e1;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.04);
+}
+
+.photo-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.photo-card-header h3 {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.sidebar-photo-wrapper {
+  overflow: hidden;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+  margin-bottom: 12px;
+  background: #f8fafc;
+}
+
+.sidebar-photo-img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.sidebar-photo-wrapper:hover .sidebar-photo-img {
+  transform: scale(1.04);
+}
+
+.photo-caption {
+  font-size: 0.84rem;
+  color: #475569;
+  line-height: 1.45;
+  background: #f8fafc;
+  border-radius: 10px;
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
 }
 
 /* ==========================================================================
