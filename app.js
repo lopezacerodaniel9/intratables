@@ -1,16 +1,14 @@
-// Peña Los Intratables - Almodóvar del Campo App Logic (V7 - Sin Precio/UD)
+// Peña Los Intratables - Almodóvar del Campo App Logic (V8 - Registro e Inicio de Sesión de Usuarios)
 
-const STORAGE_KEY = 'intratables_peña_db_v7';
-const DEFAULT_PIN = '1234';
+const STORAGE_KEY = 'intratables_peña_db_v8';
 
 // Instancias globales de gráficos Chart.js
 let chartGastoCatInstance = null;
 let chartPresupuestoVsRealInstance = null;
 
-// Datos de inicio por defecto con Importe Total por Compra
+// Datos de inicio por defecto con Usuarios Registrados
 const DEFAULT_DATA = {
   config: {
-    pin: DEFAULT_PIN,
     cuotaSocio: 120,
     totalCorralon: 800,
     tarifaDia: 15,
@@ -18,6 +16,9 @@ const DEFAULT_DATA = {
     tarifaCompleto: 70,
     fechaFiestas: '2026-09-12T12:00:00'
   },
+  usuarios: [
+    { id: 'usr_admin', usuario: 'Intratables', clave: 'admin1234', nombre: 'Tesorero Intratable', rol: 'admin' }
+  ],
   socios: [
     { id: 'soc_1', nombre: 'Daniel Lacero', cuota: 120, pagado: 120 },
     { id: 'soc_2', nombre: 'Carlos "El Mula"', cuota: 120, pagado: 120 },
@@ -73,7 +74,7 @@ const DEFAULT_DATA = {
 
 // State Manager
 let db = loadData();
-let isAdmin = false;
+let currentUser = loadSession();
 
 function loadData() {
   const saved = localStorage.getItem(STORAGE_KEY);
@@ -81,6 +82,7 @@ function loadData() {
     try {
       const data = JSON.parse(saved);
       if (!data.compras) data.compras = JSON.parse(JSON.stringify(DEFAULT_DATA.compras));
+      if (!data.usuarios) data.usuarios = JSON.parse(JSON.stringify(DEFAULT_DATA.usuarios));
       return data;
     } catch (e) {
       console.error('Error al cargar LocalStorage:', e);
@@ -94,18 +96,39 @@ function saveData() {
   renderAll();
 }
 
+function loadSession() {
+  const sess = sessionStorage.getItem('intratables_session_user');
+  if (sess) {
+    try {
+      return JSON.parse(sess);
+    } catch (e) {}
+  }
+  return null;
+}
+
+function saveSession(user) {
+  currentUser = user;
+  if (user) {
+    sessionStorage.setItem('intratables_session_user', JSON.stringify(user));
+  } else {
+    sessionStorage.removeItem('intratables_session_user');
+  }
+  updateAuthUI();
+}
+
 // App Initialization
 document.addEventListener('DOMContentLoaded', () => {
   setupNavigation();
   setupSubTabs();
   setupFiltersAndSearch();
   setupFormsAndModals();
-  setupAdminControls();
+  setupAuthControls();
   startCountdownTimer();
+  updateAuthUI();
   renderAll();
 });
 
-// Navigation Tabs (Sincronizado con la barra de navegación de iOS)
+// Navigation Tabs
 function setupNavigation() {
   const tabs = document.querySelectorAll('.nav-tab, .ios-tab-item');
   tabs.forEach(tab => {
@@ -163,51 +186,141 @@ window.switchTab = function(tabId) {
   if (tabBtn) tabBtn.click();
 };
 
-// Admin & PIN Mode
-function setupAdminControls() {
-  const btnPinToggle = document.getElementById('btn-pin-toggle');
-  const btnSubmitPin = document.getElementById('btn-submit-pin');
-  const inputPinAuth = document.getElementById('input-pin-auth');
+// Autenticación & Control de Sesión
+function setupAuthControls() {
+  const btnAuthTrigger = document.getElementById('btn-auth-trigger');
+  const modalAuth = document.getElementById('modal-auth');
+  
+  const tabLogin = document.getElementById('auth-tab-login');
+  const tabRegister = document.getElementById('auth-tab-register');
+  const formLogin = document.getElementById('form-login');
+  const formRegister = document.getElementById('form-register');
 
-  btnPinToggle.addEventListener('click', () => {
-    if (isAdmin) {
-      isAdmin = false;
-      updateAdminUI();
-      alert('🔒 Has salido del modo Administrador / Tesorero.');
+  btnAuthTrigger.addEventListener('click', () => {
+    if (currentUser) {
+      if (confirm(`¿Cerrar la sesión de ${currentUser.nombre}?`)) {
+        saveSession(null);
+        alert('🔒 Sesión cerrada.');
+      }
     } else {
-      switchTab('tab-ajustes');
-      inputPinAuth.focus();
+      openModalAuth();
     }
   });
 
-  btnSubmitPin.addEventListener('click', () => {
-    const pin = inputPinAuth.value.trim();
-    if (pin === db.config.pin) {
-      isAdmin = true;
-      inputPinAuth.value = '';
-      updateAdminUI();
-      alert('🔓 Modo Administrador / Tesorero desbloqueado.');
-      switchTab('tab-dashboard');
+  document.getElementById('btn-open-register')?.addEventListener('click', () => {
+    openModalAuth('register');
+  });
+
+  tabLogin.addEventListener('click', () => {
+    tabLogin.classList.add('active');
+    tabRegister.classList.remove('active');
+    formLogin.style.display = 'block';
+    formRegister.style.display = 'none';
+  });
+
+  tabRegister.addEventListener('click', () => {
+    tabRegister.classList.add('active');
+    tabLogin.classList.remove('active');
+    formRegister.style.display = 'block';
+    formLogin.style.display = 'none';
+  });
+
+  // Submit Login
+  formLogin.addEventListener('submit', e => {
+    e.preventDefault();
+    const usr = document.getElementById('login-usuario').value.trim();
+    const pass = document.getElementById('login-clave').value.trim();
+
+    const found = db.usuarios.find(u => u.usuario.toLowerCase() === usr.toLowerCase() && u.clave === pass);
+
+    if (found) {
+      saveSession(found);
+      closeModals();
+      alert(`🎉 ¡Bienvenido ${found.nombre}! Modo Tesorero activado.`);
     } else {
-      alert('❌ PIN Incorrecto. El PIN por defecto es 1234.');
+      alert('❌ Usuario o contraseña incorrectos.\nUsuario por defecto: Intratables\nContraseña por defecto: admin1234');
     }
+  });
+
+  // Submit Register
+  formRegister.addEventListener('submit', e => {
+    e.preventDefault();
+    const nombre = document.getElementById('reg-nombre').value.trim();
+    const usuario = document.getElementById('reg-usuario').value.trim();
+    const clave = document.getElementById('reg-clave').value.trim();
+
+    if (db.usuarios.some(u => u.usuario.toLowerCase() === usuario.toLowerCase())) {
+      alert('⚠️ Este nombre de usuario ya está registrado. Elige otro.');
+      return;
+    }
+
+    const newUser = { id: 'usr_' + Date.now(), nombre, usuario, clave, rol: 'tesorero' };
+    db.usuarios.push(newUser);
+    saveData();
+    saveSession(newUser);
+    closeModals();
+    alert(`🎉 ¡Cuenta creada con éxito! Bienvenido ${nombre}.`);
   });
 }
 
-function updateAdminUI() {
-  const pinStatusText = document.getElementById('pin-status-text');
-  const pinStatusIcon = document.getElementById('pin-status-icon');
-  
-  if (isAdmin) {
+function openModalAuth(tab = 'login') {
+  const modalAuth = document.getElementById('modal-auth');
+  const tabLogin = document.getElementById('auth-tab-login');
+  const tabRegister = document.getElementById('auth-tab-register');
+  const formLogin = document.getElementById('form-login');
+  const formRegister = document.getElementById('form-register');
+
+  formLogin.reset();
+  formRegister.reset();
+
+  if (tab === 'register') {
+    tabRegister.classList.add('active');
+    tabLogin.classList.remove('active');
+    formRegister.style.display = 'block';
+    formLogin.style.display = 'none';
+  } else {
+    tabLogin.classList.add('active');
+    tabRegister.classList.remove('active');
+    formLogin.style.display = 'block';
+    formRegister.style.display = 'none';
+  }
+
+  modalAuth.classList.add('active');
+}
+
+function updateAuthUI() {
+  const userStatusIcon = document.getElementById('user-status-icon');
+  const userStatusText = document.getElementById('user-status-text');
+  const sessionBanner = document.getElementById('session-banner');
+
+  if (currentUser) {
     document.body.classList.remove('read-only');
-    pinStatusText.textContent = 'Modo Tesorero (Activo)';
-    pinStatusIcon.textContent = '🔓';
+    document.body.classList.add('authenticated');
+    userStatusIcon.textContent = '👤';
+    userStatusText.textContent = currentUser.nombre;
+    sessionBanner.innerHTML = `<span>🟢 Sesión Activa: <strong>${escapeHTML(currentUser.nombre)}</strong> (${escapeHTML(currentUser.usuario)})</span> <button onclick="saveSession(null)" class="ios-link-btn" style="color: #dc2626;">Salir 🚪</button>`;
   } else {
     document.body.classList.add('read-only');
-    pinStatusText.textContent = 'Modo Lectura';
-    pinStatusIcon.textContent = '🔒';
+    document.body.classList.remove('authenticated');
+    userStatusIcon.textContent = '🔑';
+    userStatusText.textContent = 'Acceso Tesorero';
+    sessionBanner.innerHTML = `<span>👁️ Modo Lectura (Sin inicio de sesión)</span> <button onclick="openModalAuth()" class="ios-link-btn">Iniciar Sesión 🔐</button>`;
   }
+
+  renderUsuariosList();
   renderAll();
+}
+
+function renderUsuariosList() {
+  const ul = document.getElementById('list-usuarios-registered');
+  if (!ul) return;
+
+  ul.innerHTML = db.usuarios.map(u => `
+    <li>
+      <span>👤 <strong>${escapeHTML(u.nombre)}</strong> (${escapeHTML(u.usuario)})</span>
+      <span class="badge badge-success">${u.rol === 'admin' ? 'Administrador' : 'Tesorero'}</span>
+    </li>
+  `).join('');
 }
 
 // Countdown Timer
@@ -262,12 +375,12 @@ function renderMetrics() {
   // Compras Comunes Compradas
   const totalComprasIniciales = db.compras
     .filter(c => c.estado === 'comprado' && c.categoria !== 'corralon')
-    .reduce((acc, c) => acc + (Number(c.precioTotal) || Number(c.precio) || 0), 0);
+    .reduce((acc, c) => acc + (Number(c.precio) || 0), 0);
 
   // Gasto Corralón
   const gastoCorralon = db.compras
     .filter(c => c.categoria === 'corralon' && c.estado === 'comprado')
-    .reduce((acc, c) => acc + (Number(c.precioTotal) || Number(c.precio) || 0), 0);
+    .reduce((acc, c) => acc + (Number(c.precio) || 0), 0);
   
   const presupuestoCorralon = db.config.totalCorralon || 800;
 
@@ -339,7 +452,7 @@ function renderCharts() {
   let gastoOtrosCompras = 0;
 
   db.compras.forEach(c => {
-    const val = c.estado === 'comprado' ? (Number(c.precioTotal) || Number(c.precio) || 0) : 0;
+    const val = c.estado === 'comprado' ? (Number(c.precio) || 0) : 0;
     if (c.categoria === 'corralon') gastoCorralon += val;
     else if (c.categoria === 'alcohol') gastoAlcohol += val;
     else if (c.categoria === 'refrescos') gastoRefrescos += val;
@@ -472,8 +585,8 @@ function renderCompras() {
 
   tbody.innerHTML = list.map((c, index) => {
     const isComprado = c.estado === 'comprado';
-    const cantidadText = c.cantidad || (c.unidades ? `${c.unidades} ${c.formato || ''}` : '-');
-    const pTotal = Number(c.precio || c.precioTotal || 0).toFixed(2);
+    const cantidadText = c.cantidad || '-';
+    const pTotal = Number(c.precio || 0).toFixed(2);
 
     return `
       <tr>
@@ -488,11 +601,13 @@ function renderCompras() {
           </span>
         </td>
         <td class="text-right">
-          <button class="btn-secondary btn-sm" onclick="toggleEstadoCompra('${c.id}')">
-            ${isComprado ? 'Desmarcar' : '✅ Marcar Comprado'}
-          </button>
-          <button class="btn-secondary btn-sm admin-only" onclick="openModalCompra('${c.id}')">✏️</button>
-          <button class="btn-danger btn-sm admin-only" onclick="deleteCompra('${c.id}')">🗑️</button>
+          ${currentUser ? `
+            <button class="btn-secondary btn-sm" onclick="toggleEstadoCompra('${c.id}')">
+              ${isComprado ? 'Desmarcar' : '✅ Marcar Comprado'}
+            </button>
+            <button class="btn-secondary btn-sm admin-only" onclick="openModalCompra('${c.id}')">✏️</button>
+            <button class="btn-danger btn-sm admin-only" onclick="deleteCompra('${c.id}')">🗑️</button>
+          ` : '<span class="text-muted" style="font-size: 0.75rem;">Solo Lectura</span>'}
         </td>
       </tr>
     `;
@@ -533,9 +648,11 @@ function renderSocios() {
         <td class="${pend > 0 ? 'text-danger' : 'text-muted'}">${pend > 0 ? pend + ' €' : '0 €'}</td>
         <td><span class="badge ${badgeClass}">${badgeText}</span></td>
         <td class="text-right">
-          ${!isPagado ? `<button class="btn-primary btn-sm admin-only" onclick="openModalPagoSocio('${s.id}')">💵 Añadir Pago</button>` : ''}
-          <button class="btn-secondary btn-sm admin-only" onclick="openModalSocio('${s.id}')">✏️</button>
-          <button class="btn-danger btn-sm admin-only" onclick="deleteSocio('${s.id}')">🗑️</button>
+          ${currentUser ? `
+            ${!isPagado ? `<button class="btn-primary btn-sm admin-only" onclick="openModalPagoSocio('${s.id}')">💵 Añadir Pago</button>` : ''}
+            <button class="btn-secondary btn-sm admin-only" onclick="openModalSocio('${s.id}')">✏️</button>
+            <button class="btn-danger btn-sm admin-only" onclick="deleteSocio('${s.id}')">🗑️</button>
+          ` : '<span class="text-muted" style="font-size: 0.75rem;">Solo Lectura</span>'}
         </td>
       </tr>
     `;
@@ -584,9 +701,11 @@ function renderInvitados() {
           </span>
         </td>
         <td class="text-right">
-          ${!isPagado ? `<button class="btn-primary btn-sm admin-only" onclick="togglePagoInvitado('${i.id}')">Mark Pagado</button>` : ''}
-          <button class="btn-secondary btn-sm admin-only" onclick="openModalInvitado('${i.id}')">✏️</button>
-          <button class="btn-danger btn-sm admin-only" onclick="deleteInvitado('${i.id}')">🗑️</button>
+          ${currentUser ? `
+            ${!isPagado ? `<button class="btn-primary btn-sm admin-only" onclick="togglePagoInvitado('${i.id}')">Mark Pagado</button>` : ''}
+            <button class="btn-secondary btn-sm admin-only" onclick="openModalInvitado('${i.id}')">✏️</button>
+            <button class="btn-danger btn-sm admin-only" onclick="deleteInvitado('${i.id}')">🗑️</button>
+          ` : '<span class="text-muted" style="font-size: 0.75rem;">Solo Lectura</span>'}
         </td>
       </tr>
     `;
@@ -638,9 +757,11 @@ function renderGastos() {
           </span>
         </td>
         <td class="text-right">
-          ${!isAprobado ? `<button class="btn-primary btn-sm admin-only" onclick="aprobarGasto('${g.id}')">Aprobar</button>` : ''}
-          <button class="btn-secondary btn-sm admin-only" onclick="openModalGasto('${g.id}')">✏️</button>
-          <button class="btn-danger btn-sm admin-only" onclick="deleteGasto('${g.id}')">🗑️</button>
+          ${currentUser ? `
+            ${!isAprobado ? `<button class="btn-primary btn-sm admin-only" onclick="aprobarGasto('${g.id}')">Aprobar</button>` : ''}
+            <button class="btn-secondary btn-sm admin-only" onclick="openModalGasto('${g.id}')">✏️</button>
+            <button class="btn-danger btn-sm admin-only" onclick="deleteGasto('${g.id}')">🗑️</button>
+          ` : '<span class="text-muted" style="font-size: 0.75rem;">Solo Lectura</span>'}
         </td>
       </tr>
     `;
@@ -711,11 +832,16 @@ function setupFormsAndModals() {
   });
 
   // Open Add Compra Común
-  document.getElementById('btn-add-compra').addEventListener('click', () => openModalCompra());
+  document.getElementById('btn-add-compra')?.addEventListener('click', () => {
+    if (!currentUser) return openModalAuth();
+    openModalCompra();
+  });
 
   // Save Compra Común Form
   document.getElementById('form-compra').addEventListener('submit', e => {
     e.preventDefault();
+    if (!currentUser) return openModalAuth();
+
     const id = document.getElementById('compra-id').value;
     const nombre = document.getElementById('compra-nombre').value.trim();
     const cantidad = document.getElementById('compra-cantidad').value.trim();
@@ -736,11 +862,16 @@ function setupFormsAndModals() {
   });
 
   // Open Add Socio
-  document.getElementById('btn-add-socio').addEventListener('click', () => openModalSocio());
+  document.getElementById('btn-add-socio')?.addEventListener('click', () => {
+    if (!currentUser) return openModalAuth();
+    openModalSocio();
+  });
 
   // Save Socio Form
   document.getElementById('form-socio').addEventListener('submit', e => {
     e.preventDefault();
+    if (!currentUser) return openModalAuth();
+
     const id = document.getElementById('socio-id').value;
     const nombre = document.getElementById('socio-nombre').value.trim();
     const cuota = Number(document.getElementById('socio-cuota').value);
@@ -761,6 +892,8 @@ function setupFormsAndModals() {
   // Save Pago Socio
   document.getElementById('form-pago-socio').addEventListener('submit', e => {
     e.preventDefault();
+    if (!currentUser) return openModalAuth();
+
     const id = document.getElementById('pago-socio-id').value;
     const cantidad = Number(document.getElementById('pago-socio-cantidad').value);
 
@@ -773,7 +906,10 @@ function setupFormsAndModals() {
   });
 
   // Open Add Invitado
-  document.getElementById('btn-add-invitado').addEventListener('click', () => openModalInvitado());
+  document.getElementById('btn-add-invitado')?.addEventListener('click', () => {
+    if (!currentUser) return openModalAuth();
+    openModalInvitado();
+  });
 
   // Modalidad invitado change price auto
   document.getElementById('invitado-modalidad').addEventListener('change', e => {
@@ -796,6 +932,8 @@ function setupFormsAndModals() {
   // Save Invitado Form
   document.getElementById('form-invitado').addEventListener('submit', e => {
     e.preventDefault();
+    if (!currentUser) return openModalAuth();
+
     const id = document.getElementById('invitado-id').value;
     const nombre = document.getElementById('invitado-nombre').value.trim();
     const anfitrionId = document.getElementById('invitado-anfitrion').value;
@@ -817,11 +955,16 @@ function setupFormsAndModals() {
   });
 
   // Open Add Gasto Extra
-  document.getElementById('btn-add-gasto').addEventListener('click', () => openModalGasto());
+  document.getElementById('btn-add-gasto')?.addEventListener('click', () => {
+    if (!currentUser) return openModalAuth();
+    openModalGasto();
+  });
 
   // Save Gasto Extra Form
   document.getElementById('form-gasto').addEventListener('submit', e => {
     e.preventDefault();
+    if (!currentUser) return openModalAuth();
+
     const id = document.getElementById('gasto-id').value;
     const concepto = document.getElementById('gasto-concepto').value.trim();
     const categoria = document.getElementById('gasto-categoria').value;
@@ -844,6 +987,8 @@ function setupFormsAndModals() {
   // Config Tarifas Form
   document.getElementById('form-config-tarifas').addEventListener('submit', e => {
     e.preventDefault();
+    if (!currentUser) return openModalAuth();
+
     db.config.cuotaSocio = Number(document.getElementById('cfg-cuota-socio').value);
     db.config.totalCorralon = Number(document.getElementById('cfg-total-corralon').value);
     db.config.tarifaDia = Number(document.getElementById('cfg-tarifa-dia').value);
@@ -877,6 +1022,7 @@ function setupFormsAndModals() {
         if (imported.socios && imported.gastos) {
           db = imported;
           if (!db.compras) db.compras = JSON.parse(JSON.stringify(DEFAULT_DATA.compras));
+          if (!db.usuarios) db.usuarios = JSON.parse(JSON.stringify(DEFAULT_DATA.usuarios));
           saveData();
           alert('🎉 Cuentas importadas con éxito.');
         } else {
@@ -891,6 +1037,8 @@ function setupFormsAndModals() {
 
   // Reset Data
   document.getElementById('btn-reset-data').addEventListener('click', () => {
+    if (!currentUser) return openModalAuth();
+
     if (confirm('⚠️ ¿Seguro que quieres resetear los datos a los valores de prueba por defecto?')) {
       db = JSON.parse(JSON.stringify(DEFAULT_DATA));
       saveData();
@@ -906,6 +1054,8 @@ function closeModals() {
 
 // 1. Compra Común (Bote General)
 window.openModalCompra = function(id = null) {
+  if (!currentUser) return openModalAuth();
+
   const modal = document.getElementById('modal-compra');
   const title = document.getElementById('modal-compra-title');
   document.getElementById('form-compra').reset();
@@ -916,9 +1066,9 @@ window.openModalCompra = function(id = null) {
       title.textContent = 'Editar Compra Común';
       document.getElementById('compra-id').value = c.id;
       document.getElementById('compra-nombre').value = c.nombre;
-      document.getElementById('compra-cantidad').value = c.cantidad || (c.unidades ? `${c.unidades} ${c.formato || ''}` : '');
+      document.getElementById('compra-cantidad').value = c.cantidad || '';
       document.getElementById('compra-categoria').value = c.categoria;
-      document.getElementById('compra-precio').value = c.precio || c.precioTotal || 0;
+      document.getElementById('compra-precio').value = c.precio || 0;
       document.getElementById('compra-estado').value = c.estado;
     }
   } else {
@@ -931,6 +1081,7 @@ window.openModalCompra = function(id = null) {
 };
 
 window.toggleEstadoCompra = function(id) {
+  if (!currentUser) return openModalAuth();
   const c = db.compras.find(item => item.id === id);
   if (c) {
     c.estado = c.estado === 'comprado' ? 'pendiente' : 'comprado';
@@ -939,6 +1090,7 @@ window.toggleEstadoCompra = function(id) {
 };
 
 window.deleteCompra = function(id) {
+  if (!currentUser) return openModalAuth();
   if (confirm('¿Eliminar esta compra de la lista común?')) {
     db.compras = db.compras.filter(c => c.id !== id);
     saveData();
@@ -947,6 +1099,8 @@ window.deleteCompra = function(id) {
 
 // 2. Socio Modal & Actions
 window.openModalSocio = function(id = null) {
+  if (!currentUser) return openModalAuth();
+
   const modal = document.getElementById('modal-socio');
   const title = document.getElementById('modal-socio-title');
   document.getElementById('form-socio').reset();
@@ -971,6 +1125,8 @@ window.openModalSocio = function(id = null) {
 };
 
 window.openModalPagoSocio = function(id) {
+  if (!currentUser) return openModalAuth();
+
   const s = db.socios.find(item => item.id === id);
   if (!s) return;
 
@@ -986,6 +1142,7 @@ window.openModalPagoSocio = function(id) {
 };
 
 window.deleteSocio = function(id) {
+  if (!currentUser) return openModalAuth();
   if (confirm('¿Eliminar este peñista de la lista?')) {
     db.socios = db.socios.filter(s => s.id !== id);
     saveData();
@@ -994,6 +1151,8 @@ window.deleteSocio = function(id) {
 
 // 3. Invitado Modal & Actions
 window.openModalInvitado = function(id = null) {
+  if (!currentUser) return openModalAuth();
+
   const modal = document.getElementById('modal-invitado');
   const title = document.getElementById('modal-invitado-title');
   const selectAnfitrion = document.getElementById('invitado-anfitrion');
@@ -1025,6 +1184,7 @@ window.openModalInvitado = function(id = null) {
 };
 
 window.togglePagoInvitado = function(id) {
+  if (!currentUser) return openModalAuth();
   const inv = db.invitados.find(i => i.id === id);
   if (inv) {
     inv.estado = 'pagado';
@@ -1033,6 +1193,7 @@ window.togglePagoInvitado = function(id) {
 };
 
 window.deleteInvitado = function(id) {
+  if (!currentUser) return openModalAuth();
   if (confirm('¿Eliminar este invitado?')) {
     db.invitados = db.invitados.filter(i => i.id !== id);
     saveData();
@@ -1041,6 +1202,8 @@ window.deleteInvitado = function(id) {
 
 // 4. Gasto Extra / Imprevisto Modal & Actions
 window.openModalGasto = function(id = null) {
+  if (!currentUser) return openModalAuth();
+
   const modal = document.getElementById('modal-gasto');
   const title = document.getElementById('modal-gasto-title');
   const selectComprador = document.getElementById('gasto-comprador');
@@ -1070,6 +1233,7 @@ window.openModalGasto = function(id = null) {
 };
 
 window.aprobarGasto = function(id) {
+  if (!currentUser) return openModalAuth();
   const g = db.gastos.find(item => item.id === id);
   if (g) {
     g.estado = 'aprobado';
@@ -1078,6 +1242,7 @@ window.aprobarGasto = function(id) {
 };
 
 window.deleteGasto = function(id) {
+  if (!currentUser) return openModalAuth();
   if (confirm('¿Eliminar este gasto extra?')) {
     db.gastos = db.gastos.filter(g => g.id !== id);
     saveData();

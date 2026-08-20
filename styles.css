@@ -59,6 +59,25 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* Status Banner de Sesión */
+.ios-session-banner {
+  margin-top: 6px;
+  background: rgba(229, 229, 234, 0.6);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+body.authenticated .ios-session-banner {
+  background: #dcfce7;
+  color: #15803d;
+  font-weight: 600;
+}
+
 /* ==========================================================================
    DESKTOP / PC STYLES (>= 768px) - ESTÉTICA TIPO HOJA DE CÁLCULO EXCEL
    ========================================================================== */

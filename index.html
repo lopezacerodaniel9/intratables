@@ -22,7 +22,7 @@
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body class="ios-app">
+<body class="ios-app read-only">
   <div class="app-container">
     
     <!-- iOS App Navigation Header (Top Nav Bar) -->
@@ -36,9 +36,14 @@
             <p class="ios-app-subtitle">Almodóvar del Campo • Fiestas Septiembre</p>
           </div>
         </div>
-        <button id="btn-pin-toggle" class="ios-pill-btn">
-          <span id="pin-status-icon">🔒</span> <span id="pin-status-text">Lectura</span>
+        <button id="btn-auth-trigger" class="ios-pill-btn">
+          <span id="user-status-icon">🔑</span> <span id="user-status-text">Acceso Tesorero</span>
         </button>
+      </div>
+
+      <!-- User Active Session Banner -->
+      <div id="session-banner" class="ios-session-banner">
+        <span>👁️ Modo Lectura (Sin inicio de sesión)</span>
       </div>
 
       <!-- iOS Countdown Banner -->
@@ -53,7 +58,7 @@
       <button class="nav-tab" data-tab="tab-compras-comunes">🛒 Compras Comunes (Bote)</button>
       <button class="nav-tab" data-tab="tab-peñistas">👥 Peñistas e Invitados</button>
       <button class="nav-tab" data-tab="tab-gastos-extras">🚨 Gastos Extras e Imprevistos</button>
-      <button class="nav-tab" data-tab="tab-ajustes">⚙️ Ajustes & Backup</button>
+      <button class="nav-tab" data-tab="tab-ajustes">⚙️ Ajustes & Usuarios</button>
     </nav>
 
     <!-- Main Content Area -->
@@ -167,7 +172,7 @@
             <h2>🛒 Compras Comunes del Bote</h2>
             <p class="ios-sub-desc">Lista de compras del bote inicial a nombre de la peña.</p>
           </div>
-          <button class="ios-btn-action" id="btn-add-compra">+ Añadir</button>
+          <button class="ios-btn-action admin-only" id="btn-add-compra">+ Añadir Producto</button>
         </div>
 
         <div class="ios-search-wrapper">
@@ -247,7 +252,7 @@
         <div id="subpane-invitados" class="subpane">
           <div class="ios-search-wrapper">
             <input type="text" id="search-invitados" class="ios-search-input" placeholder="🔍 Buscar invitado...">
-            <button class="ios-btn-action" id="btn-add-invitado">+ Invitado</button>
+            <button class="ios-btn-action admin-only" id="btn-add-invitado">+ Invitado</button>
           </div>
 
           <div class="ios-card ios-table-card">
@@ -281,7 +286,7 @@
             <h2>🚨 Gastos Extraordinarios e Imprevistos</h2>
             <p class="ios-sub-desc">Reposición de hielos, vasos extra o imprevistos de última hora.</p>
           </div>
-          <button class="ios-btn-action" id="btn-add-gasto">+ Gasto Extra</button>
+          <button class="ios-btn-action admin-only" id="btn-add-gasto">+ Gasto Extra</button>
         </div>
 
         <div class="ios-search-wrapper">
@@ -316,6 +321,17 @@
 
           <div class="ios-card">
             <div class="ios-section-header">
+              <h2>👤 Gestión de Usuarios Registrados</h2>
+            </div>
+            <p class="ios-sub-desc">Lista de tesoreros y usuarios autorizados para editar la contabilidad.</p>
+            <ul id="list-usuarios-registered" class="ios-list" style="margin-top: 10px;">
+              <!-- Usuarios cargados dinámicamente -->
+            </ul>
+            <button id="btn-open-register" class="ios-btn-action" style="margin-top: 12px;">+ Registrar Nuevo Usuario</button>
+          </div>
+
+          <div class="ios-card">
+            <div class="ios-section-header">
               <h2>⚙️ Cuotas y Tarifas</h2>
             </div>
             <form id="form-config-tarifas" class="ios-form">
@@ -341,17 +357,6 @@
               </div>
               <button type="submit" class="ios-btn-submit admin-only" style="margin-top: 10px;">Guardar Cambios</button>
             </form>
-          </div>
-
-          <div class="ios-card">
-            <div class="ios-section-header">
-              <h2>🔑 Modo Tesorero (PIN)</h2>
-            </div>
-            <p class="ios-sub-desc">PIN por defecto: 1234. Permite validar cobros y cambiar datos.</p>
-            <div class="ios-form-row" style="margin-top: 10px;">
-              <input type="password" id="input-pin-auth" class="ios-search-input" placeholder="Introduce PIN">
-            </div>
-            <button id="btn-submit-pin" class="ios-btn-submit" style="margin-top: 10px;">Desbloquear Modo Tesorero</button>
           </div>
 
           <div class="ios-card">
@@ -399,7 +404,59 @@
     </nav>
   </div>
 
-  <!-- iOS Action Sheet Modals (Slide-up from Bottom) -->
+  <!-- MODAL DE LOGIN / REGISTRO DE USUARIOS -->
+  <div id="modal-auth" class="modal-backdrop">
+    <div class="ios-modal-card">
+      <div class="ios-drag-handle"></div>
+      <div class="modal-header">
+        <h3 id="modal-auth-title">🔐 Acceso de Usuario</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+
+      <!-- Segmented Auth Switcher -->
+      <div class="ios-segmented-control" style="margin-bottom: 16px;">
+        <button class="ios-segment active" id="auth-tab-login">🔑 Iniciar Sesión</button>
+        <button class="ios-segment" id="auth-tab-register">📝 Registrarse</button>
+      </div>
+
+      <!-- Form Login -->
+      <form id="form-login">
+        <div class="form-group">
+          <label>Usuario:</label>
+          <input type="text" id="login-usuario" required placeholder="Ej. admin o tu nombre">
+        </div>
+        <div class="form-group">
+          <label>Contraseña:</label>
+          <input type="password" id="login-clave" required placeholder="Introduce tu contraseña">
+        </div>
+        <p class="ios-sub-desc" style="margin-top: 4px;">Usuario por defecto: <strong>admin</strong> | Clave: <strong>1234</strong></p>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary modal-cancel">Cancelar</button>
+          <button type="submit" class="btn-primary">Entrar a la App</button>
+        </div>
+      </form>
+
+      <!-- Form Registro -->
+      <form id="form-register" style="display: none;">
+        <div class="form-group">
+          <label>Nombre Completo / Apodo:</label>
+          <input type="text" id="reg-nombre" required placeholder="Ej. Pedro Tesorero">
+        </div>
+        <div class="form-group">
+          <label>Nombre de Usuario (para Login):</label>
+          <input type="text" id="reg-usuario" required placeholder="Ej. pedro">
+        </div>
+        <div class="form-group">
+          <label>Crear Contraseña:</label>
+          <input type="password" id="reg-clave" required placeholder="Mínimo 4 caracteres">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary modal-cancel">Cancelar</button>
+          <button type="submit" class="btn-primary">Crear Cuenta y Entrar</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <!-- Modal Socio -->
   <div id="modal-socio" class="modal-backdrop">
