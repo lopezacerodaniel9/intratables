@@ -119,6 +119,12 @@ function setupNavigation() {
       const targetPane = document.getElementById(targetId);
       if (targetPane) targetPane.classList.add('active');
 
+      // Las fotos de la peña sólo aparecen en la pestaña Dashboard
+      const sidebarGallery = document.querySelector('.sidebar-gallery');
+      if (sidebarGallery) {
+        sidebarGallery.style.display = targetId === 'tab-dashboard' ? 'block' : 'none';
+      }
+
       if (targetId === 'tab-dashboard') {
         renderCharts();
       }
@@ -562,16 +568,21 @@ function renderCompras() {
     const isComprado = c.estado === 'comprado';
     const cantidadText = c.cantidad || '-';
     const pTotal = Number(c.precio || 0).toFixed(2);
+    const catLabel = catLabels[c.categoria] || c.categoria;
 
     return `
       <tr>
         <td class="desktop-only"><strong>${index + 1}</strong></td>
         <td>
           <div class="item-title"><strong>${escapeHTML(c.nombre)}</strong></div>
-          <div class="item-sub text-muted">${escapeHTML(cantidadText)} • <span class="text-success" style="font-weight:700;">${pTotal} €</span></div>
+          <div class="item-sub text-muted" style="margin-top: 3px;">
+            <span class="badge badge-warning" style="font-size: 0.76rem; padding: 2px 6px;">📦 ${escapeHTML(cantidadText)}</span>
+            <span style="font-size: 0.78rem; margin-left: 4px;">${catLabel}</span>
+            <div style="margin-top: 3px; font-size: 0.88rem; font-weight: 700; color: #16a34a;">Importe: ${pTotal} €</div>
+          </div>
         </td>
         <td class="desktop-only"><span class="badge badge-warning" style="font-size: 0.85rem;">${escapeHTML(cantidadText)}</span></td>
-        <td class="desktop-only">${catLabels[c.categoria] || c.categoria}</td>
+        <td class="desktop-only">${catLabel}</td>
         <td class="desktop-only"><strong class="text-success" style="font-size: 0.95rem;">${pTotal} €</strong></td>
         <td class="desktop-only">
           <span class="badge ${isComprado ? 'badge-success' : 'badge-warning'}">
