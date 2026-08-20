@@ -770,9 +770,9 @@ function setupFiltersAndSearch() {
     renderCompras();
   });
 
-  document.querySelectorAll('.filter-btn[data-filter-compra]').forEach(btn => {
+  document.querySelectorAll('[data-filter-compra]').forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('.filter-btn[data-filter-compra]').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('[data-filter-compra]').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       compraFilter = btn.dataset.filterCompra;
       renderCompras();
@@ -785,9 +785,9 @@ function setupFiltersAndSearch() {
     renderSocios();
   });
 
-  document.querySelectorAll('.filter-btn[data-filter-socio]').forEach(btn => {
+  document.querySelectorAll('[data-filter-socio]').forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('.filter-btn[data-filter-socio]').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('[data-filter-socio]').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       socioFilter = btn.dataset.filterSocio;
       renderSocios();
@@ -806,9 +806,9 @@ function setupFiltersAndSearch() {
     renderGastos();
   });
 
-  document.querySelectorAll('.filter-btn[data-filter-gasto], .ios-segment[data-filter-gasto]').forEach(btn => {
+  document.querySelectorAll('[data-filter-gasto]').forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('.filter-btn[data-filter-gasto], .ios-segment[data-filter-gasto]').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('[data-filter-gasto]').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       gastoFilter = btn.dataset.filterGasto;
       renderGastos();
