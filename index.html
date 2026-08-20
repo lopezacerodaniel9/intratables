@@ -165,7 +165,7 @@
         <div class="ios-section-banner">
           <div>
             <h2>🛒 Compras Comunes del Bote</h2>
-            <p class="ios-sub-desc">Calculadora automática de bote. Unidades × Precio/Ud.</p>
+            <p class="ios-sub-desc">Lista de compras del bote inicial a nombre de la peña.</p>
           </div>
           <button class="ios-btn-action" id="btn-add-compra">+ Añadir</button>
         </div>
@@ -186,10 +186,9 @@
                 <tr>
                   <th>#</th>
                   <th>Producto</th>
-                  <th>Uds</th>
-                  <th>Formato</th>
-                  <th>Precio/Ud</th>
-                  <th>Total (€)</th>
+                  <th>Cantidad / Formato</th>
+                  <th>Categoría</th>
+                  <th>Importe (€)</th>
                   <th>Estado</th>
                   <th class="text-right">Acciones</th>
                 </tr>
@@ -524,15 +523,9 @@
           <input type="text" id="compra-nombre" required placeholder="Ej. Ron Barceló 1L, Red Label 1L, Coca-Cola 2L">
         </div>
 
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Cantidad (Uds):</label>
-            <input type="number" id="compra-unidades" required min="1" step="1" value="1">
-          </div>
-          <div class="form-group">
-            <label>Formato:</label>
-            <input type="text" id="compra-formato" required placeholder="Ej. Botellas 1L, Botellas 2L">
-          </div>
+        <div class="form-group">
+          <label>Cantidad y Formato (Botellas 2L / 1L / 75CL):</label>
+          <input type="text" id="compra-cantidad" required placeholder="Ej. 40 botellas 1L, 300 botellas 2L, 1 altavoz">
         </div>
 
         <div class="form-group">
@@ -547,15 +540,9 @@
           </select>
         </div>
 
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Precio / Ud (€):</label>
-            <input type="number" id="compra-precio-unitario" required min="0" step="0.1" placeholder="Ej. 13.50">
-          </div>
-          <div class="form-group">
-            <label>⚡ Total Calculado (€):</label>
-            <input type="number" id="compra-precio-total" readonly style="background: #f1f5f9; font-weight: 700; color: #16a34a;">
-          </div>
+        <div class="form-group">
+          <label>Importe Total (€):</label>
+          <input type="number" id="compra-precio" required min="0" step="0.5" placeholder="Ej. 540">
         </div>
 
         <div class="form-group">
