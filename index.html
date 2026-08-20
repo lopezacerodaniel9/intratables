@@ -2,108 +2,97 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Peña Los Intratables - Cuentas Fiestas de Septiembre</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Los Intratables - App Fiestas</title>
+  
+  <!-- Apple & iOS Native Web App Meta Tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Intratables">
+  <meta name="theme-color" content="#f8fafc">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="https://fav.farm/🍷">
+
+  <!-- Fonts & Styles -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
-  <!-- Chart.js CDN para gráficos visuales de gastos -->
+  
+  <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body class="excel-theme">
+<body class="ios-app">
   <div class="app-container">
-    <!-- Header -->
-    <header class="app-header">
-      <div class="header-content">
-        <div class="logo-area">
-          <span class="logo-icon">📊</span>
+    
+    <!-- iOS App Navigation Header (Top Nav Bar) -->
+    <header class="ios-nav-header">
+      <div class="ios-status-spacer"></div>
+      <div class="ios-header-content">
+        <div class="ios-app-title-group">
+          <span class="ios-app-icon">🍷</span>
           <div>
-            <h1>PEÑA LOS INTRATABLES</h1>
-            <p class="subtitle">Gestión Contable Tipo Excel • Almodóvar del Campo (Fiestas Septiembre)</p>
+            <h1 class="ios-app-title">LOS INTRATABLES</h1>
+            <p class="ios-app-subtitle">Almodóvar del Campo • Fiestas Septiembre</p>
           </div>
         </div>
-        <div class="header-actions">
-          <button id="btn-pin-toggle" class="btn-secondary">
-            <span id="pin-status-icon">🔒</span> <span id="pin-status-text">Modo Lectura</span>
-          </button>
-        </div>
+        <button id="btn-pin-toggle" class="ios-pill-btn">
+          <span id="pin-status-icon">🔒</span> <span id="pin-status-text">Lectura</span>
+        </button>
       </div>
 
-      <!-- Cuenta Atrás -->
-      <div class="countdown-bar">
-        <span class="countdown-label">⏳ Cuenta atrás Fiestas de Septiembre:</span>
-        <div id="countdown-timer" class="countdown-timer">Calculando...</div>
+      <!-- iOS Countdown Banner -->
+      <div class="ios-countdown-banner">
+        <span class="ios-countdown-text">⏳ Septiembre: <strong id="countdown-timer">Calculando...</strong></span>
       </div>
     </header>
 
-    <!-- Navigation Tabs -->
-    <nav class="nav-tabs">
-      <button class="nav-tab active" data-tab="tab-dashboard">📊 Dashboard & Gráficos</button>
-      <button class="nav-tab" data-tab="tab-compras-comunes">🛒 Compras Comunes (Botellas / Bote)</button>
-      <button class="nav-tab" data-tab="tab-peñistas">👥 Peñistas e Invitados</button>
-      <button class="nav-tab" data-tab="tab-gastos-extras">🚨 Gastos Extras e Imprevistos</button>
-      <button class="nav-tab" data-tab="tab-ajustes">⚙️ Configuración & Backup</button>
-    </nav>
-
     <!-- Main Content Area -->
-    <main class="main-content">
+    <main class="ios-main-content">
 
-      <!-- TAB 1: DASHBOARD INTERACTIVO CON GRÁFICOS -->
+      <!-- TAB 1: DASHBOARD & GRÁFICOS -->
       <section id="tab-dashboard" class="tab-pane active">
-        <!-- Top Metrics Cards (Excel Style) -->
-        <div class="metrics-grid">
-          <div class="metric-card card-recaudado">
-            <div class="metric-header">
-              <span class="metric-icon">💰</span>
-              <h3>Total Recaudado</h3>
-            </div>
-            <div class="metric-value" id="val-recaudado">0 €</div>
-            <p class="metric-subtext">Socios: <span id="val-recaudado-socios">0</span>€ | Invitados: <span id="val-recaudado-invitados">0</span>€</p>
+        <!-- iOS Metrics Grid -->
+        <div class="ios-grid-metrics">
+          <div class="ios-card metric-recaudado">
+            <div class="ios-card-label">💰 Total Recaudado</div>
+            <div class="ios-card-value" id="val-recaudado">0 €</div>
+            <div class="ios-card-sub">Socios: <span id="val-recaudado-socios">0</span>€ | Invitados: <span id="val-recaudado-invitados">0</span>€</div>
           </div>
 
-          <div class="metric-card card-gastado">
-            <div class="metric-header">
-              <span class="metric-icon">💸</span>
-              <h3>Total Gastado</h3>
-            </div>
-            <div class="metric-value" id="val-gastado">0 €</div>
-            <p class="metric-subtext">Compras + Corralón + Extras</p>
+          <div class="ios-card metric-gastado">
+            <div class="ios-card-label">💸 Total Gastado</div>
+            <div class="ios-card-value" id="val-gastado">0 €</div>
+            <div class="ios-card-sub">Compras + Corralón + Extras</div>
           </div>
 
-          <div class="metric-card card-saldo">
-            <div class="metric-header">
-              <span class="metric-icon">🏦</span>
-              <h3>Saldo en Caja</h3>
-            </div>
-            <div class="metric-value" id="val-saldo">0 €</div>
-            <p class="metric-subtext" id="val-saldo-status">Caja en orden</p>
+          <div class="ios-card metric-saldo">
+            <div class="ios-card-label">🏦 Saldo en Caja</div>
+            <div class="ios-card-value" id="val-saldo">0 €</div>
+            <div class="ios-card-sub" id="val-saldo-status">Caja en orden</div>
           </div>
 
-          <div class="metric-card card-pendiente">
-            <div class="metric-header">
-              <span class="metric-icon">⏳</span>
-              <h3>Falta por Cobrar</h3>
-            </div>
-            <div class="metric-value" id="val-pendiente">0 €</div>
-            <p class="metric-subtext"><span id="val-socios-pendientes">0</span> peñistas pendientes</p>
+          <div class="ios-card metric-pendiente">
+            <div class="ios-card-label">⏳ Falta por Cobrar</div>
+            <div class="ios-card-value" id="val-pendiente">0 €</div>
+            <div class="ios-card-sub"><span id="val-socios-pendientes">0</span> peñistas pendientes</div>
           </div>
         </div>
 
         <!-- GRÁFICOS DE GASTOS -->
-        <div class="dashboard-charts-grid">
-          <div class="content-box chart-box">
-            <div class="box-header">
-              <h2>🍩 Distribución del Gasto por Categoría (€)</h2>
+        <div class="ios-charts-group">
+          <div class="ios-card chart-card">
+            <div class="ios-section-header">
+              <h2>🍩 Gastos por Categoría</h2>
             </div>
             <div class="chart-container">
               <canvas id="chartGastoCategoria"></canvas>
             </div>
           </div>
 
-          <div class="content-box chart-box">
-            <div class="box-header">
-              <h2>📊 Comparativa de Gastos por Bloque (€)</h2>
+          <div class="ios-card chart-card">
+            <div class="ios-section-header">
+              <h2>📊 Comparativa por Bloques</h2>
             </div>
             <div class="chart-container">
               <canvas id="chartPresupuestoVsReal"></canvas>
@@ -112,89 +101,86 @@
         </div>
 
         <!-- Breakdown Section -->
-        <div class="content-box">
-          <div class="box-header">
-            <h2>📈 Resumen del Gasto por Bloques</h2>
+        <div class="ios-card">
+          <div class="ios-section-header">
+            <h2>📈 Resumen por Bloques</h2>
           </div>
           
-          <div class="budget-comparison-grid">
-            <div class="budget-card">
-              <span class="budget-title">🏠 Corralón (Alquiler)</span>
-              <div class="budget-amount" id="dash-corralon-amount">0 €</div>
-              <p class="budget-sub">Presupuesto fijado: <strong id="dash-corralon-budget">800 €</strong></p>
+          <div class="ios-budget-row">
+            <div class="ios-budget-item">
+              <span class="ios-item-title">🏠 Corralón</span>
+              <span class="ios-item-val" id="dash-corralon-amount">0 €</span>
+              <span class="ios-item-sub">Fijo: <strong id="dash-corralon-budget">800 €</strong></span>
             </div>
 
-            <div class="budget-card">
-              <span class="budget-title">🍾 Compras Comunes (Bote Botellas)</span>
-              <div class="budget-amount" id="dash-iniciales-amount">0 €</div>
-              <p class="budget-sub">Bebidas 2L, alcohol 1L, equipos</p>
+            <div class="ios-budget-item">
+              <span class="ios-item-title">🍾 Compras Bote</span>
+              <span class="ios-item-val" id="dash-iniciales-amount">0 €</span>
+              <span class="ios-item-sub">Bebidas 2L, alcohol 1L</span>
             </div>
 
-            <div class="budget-card card-extra">
-              <span class="budget-title">🚨 Extras e Imprevistos</span>
-              <div class="budget-amount text-danger" id="dash-extras-amount">0 €</div>
-              <p class="budget-sub">Hielos, vasos extra o reposición urgente</p>
+            <div class="ios-budget-item ios-item-extra">
+              <span class="ios-item-title">🚨 Imprevistos</span>
+              <span class="ios-item-val text-danger" id="dash-extras-amount">0 €</span>
+              <span class="ios-item-sub">Hielos, vasos extra</span>
             </div>
           </div>
         </div>
 
-        <!-- Quick Summary Columns -->
-        <div class="dashboard-columns">
-          <div class="content-box">
-            <div class="box-header">
-              <h2>⚠️ Peñistas con Cobro Pendiente</h2>
-              <button class="btn-link" onclick="switchTab('tab-peñistas')">Ver hoja socios →</button>
+        <!-- Summary Lists -->
+        <div class="ios-summary-grid">
+          <div class="ios-card">
+            <div class="ios-section-header">
+              <h2>⚠️ Pendientes de Cobro</h2>
+              <button class="ios-link-btn" onclick="switchTab('tab-peñistas')">Ver socios →</button>
             </div>
-            <ul id="list-deudores-summary" class="simple-list">
+            <ul id="list-deudores-summary" class="ios-list">
               <li class="empty-msg">Cargando lista...</li>
             </ul>
           </div>
 
-          <div class="content-box">
-            <div class="box-header">
-              <h2>🚨 Últimos Gastos Extra Imprevistos</h2>
-              <button class="btn-link" onclick="switchTab('tab-gastos-extras')">Ver todos →</button>
+          <div class="ios-card">
+            <div class="ios-section-header">
+              <h2>🚨 Últimos Imprevistos</h2>
+              <button class="ios-link-btn" onclick="switchTab('tab-gastos-extras')">Ver extras →</button>
             </div>
-            <ul id="list-gastos-summary" class="simple-list">
-              <li class="empty-msg">No hay gastos extras registrados aún.</li>
+            <ul id="list-gastos-summary" class="ios-list">
+              <li class="empty-msg">No hay gastos extras aún.</li>
             </ul>
           </div>
         </div>
       </section>
 
-      <!-- TAB 2: COMPRAS COMUNES (BOTE GENERAL DE BOTELLAS) -->
+      <!-- TAB 2: COMPRAS COMUNES -->
       <section id="tab-compras-comunes" class="tab-pane">
-        <div class="section-banner">
+        <div class="ios-section-banner">
           <div>
-            <h2>🛒 Hoja de Compras Comunes (Bote de Botellas y Suministros)</h2>
-            <p class="text-muted">Introduce unidades y precio por unidad. El gasto total se calculará automáticamente.</p>
+            <h2>🛒 Compras Comunes del Bote</h2>
+            <p class="ios-sub-desc">Calculadora automática de bote. Unidades × Precio/Ud.</p>
           </div>
-          <button class="btn-primary" id="btn-add-compra">+ Añadir Producto a la Hoja</button>
+          <button class="ios-btn-action" id="btn-add-compra">+ Añadir</button>
         </div>
 
-        <div class="section-actions" style="margin-top: 15px;">
-          <div class="search-bar">
-            <input type="text" id="search-compras" placeholder="🔍 Buscar producto (Barceló 1L, Red Label, Coca-Cola 2L, Altavoz)...">
-          </div>
-          <div class="filter-buttons">
-            <button class="filter-btn active" data-filter-compra="todos">Todos</button>
-            <button class="filter-btn" data-filter-compra="pendiente">⏳ Pendientes</button>
-            <button class="filter-btn" data-filter-compra="comprado">✅ Ya Comprados</button>
+        <div class="ios-search-wrapper">
+          <input type="text" id="search-compras" class="ios-search-input" placeholder="🔍 Buscar producto...">
+          <div class="ios-segmented-control">
+            <button class="ios-segment active" data-filter-compra="todos">Todos</button>
+            <button class="ios-segment" data-filter-compra="pendiente">Pendientes</button>
+            <button class="ios-segment" data-filter-compra="comprado">Comprados</button>
           </div>
         </div>
 
-        <div class="content-box excel-table-box">
+        <div class="ios-card ios-table-card">
           <div class="table-responsive">
-            <table class="data-table excel-table">
+            <table class="data-table ios-table">
               <thead>
                 <tr>
                   <th>#</th>
-                  <th>Producto / Artículo</th>
-                  <th>Cantidad (Unidades)</th>
+                  <th>Producto</th>
+                  <th>Uds</th>
                   <th>Formato</th>
-                  <th>Categoría</th>
-                  <th>Precio / Ud (€)</th>
-                  <th>Total Calculado (€)</th>
+                  <th>Precio/Ud</th>
+                  <th>Total (€)</th>
                   <th>Estado</th>
                   <th class="text-right">Acciones</th>
                 </tr>
@@ -209,37 +195,35 @@
 
       <!-- TAB 3: PEÑISTAS E INVITADOS -->
       <section id="tab-peñistas" class="tab-pane">
-        <!-- Sub-Tabs -->
-        <div class="subnav-tabs">
-          <button class="subnav-btn active" id="subtab-btn-socios">👥 Hoja Peñistas Socios (<span id="count-socios">0</span>)</button>
-          <button class="subnav-btn" id="subtab-btn-invitados">🎟️ Hoja Invitados (<span id="count-invitados">0</span>)</button>
+        <!-- iOS Segmented Subnav -->
+        <div class="ios-segmented-control subnav-segmented" style="margin-bottom: 16px;">
+          <button class="ios-segment active" id="subtab-btn-socios">👥 Peñistas Socios (<span id="count-socios">0</span>)</button>
+          <button class="ios-segment" id="subtab-btn-invitados">🎟️ Invitados (<span id="count-invitados">0</span>)</button>
         </div>
 
-        <!-- SUB-PANE: SOCIOS -->
+        <!-- SUBPANE: SOCIOS -->
         <div id="subpane-socios" class="subpane active">
-          <div class="section-actions">
-            <div class="search-bar">
-              <input type="text" id="search-socios" placeholder="🔍 Buscar peñista por nombre o apodo...">
+          <div class="ios-search-wrapper">
+            <input type="text" id="search-socios" class="ios-search-input" placeholder="🔍 Buscar peñista por nombre...">
+            <div class="ios-segmented-control">
+              <button class="ios-segment active" data-filter-socio="todos">Todos</button>
+              <button class="ios-segment" data-filter-socio="pendiente">Deudores</button>
+              <button class="ios-segment" data-filter-socio="pagado">Pagados</button>
             </div>
-            <div class="filter-buttons">
-              <button class="filter-btn active" data-filter-socio="todos">Todos</button>
-              <button class="filter-btn" data-filter-socio="pendiente">Falta por Pagar</button>
-              <button class="filter-btn" data-filter-socio="pagado">Pagados</button>
-            </div>
-            <button class="btn-primary admin-only" id="btn-add-socio">+ Nuevo Peñista</button>
+            <button class="ios-btn-action admin-only" id="btn-add-socio">+ Peñista</button>
           </div>
 
-          <div class="content-box excel-table-box">
+          <div class="ios-card ios-table-card">
             <div class="table-responsive">
-              <table class="data-table excel-table">
+              <table class="data-table ios-table">
                 <thead>
                   <tr>
                     <th>#</th>
                     <th>Nombre Peñista</th>
-                    <th>Cuota Bote</th>
+                    <th>Cuota</th>
                     <th>Pagado</th>
-                    <th>Falta por Pagar</th>
-                    <th>Estado Pago</th>
+                    <th>Falta Pagar</th>
+                    <th>Estado</th>
                     <th class="text-right">Acciones</th>
                   </tr>
                 </thead>
@@ -251,25 +235,23 @@
           </div>
         </div>
 
-        <!-- SUB-PANE: INVITADOS -->
+        <!-- SUBPANE: INVITADOS -->
         <div id="subpane-invitados" class="subpane">
-          <div class="section-actions">
-            <div class="search-bar">
-              <input type="text" id="search-invitados" placeholder="🔍 Buscar invitado o peñista anfitrión...">
-            </div>
-            <button class="btn-primary" id="btn-add-invitado">+ Registrar Invitado</button>
+          <div class="ios-search-wrapper">
+            <input type="text" id="search-invitados" class="ios-search-input" placeholder="🔍 Buscar invitado...">
+            <button class="ios-btn-action" id="btn-add-invitado">+ Invitado</button>
           </div>
 
-          <div class="content-box excel-table-box">
+          <div class="ios-card ios-table-card">
             <div class="table-responsive">
-              <table class="data-table excel-table">
+              <table class="data-table ios-table">
                 <thead>
                   <tr>
                     <th>#</th>
                     <th>Invitado</th>
-                    <th>Peñista Anfitrión</th>
-                    <th>Tipo de Pase</th>
-                    <th>Día / Detalle</th>
+                    <th>Anfitrión</th>
+                    <th>Pase</th>
+                    <th>Detalle</th>
                     <th>Importe</th>
                     <th>Estado</th>
                     <th class="text-right">Acciones</th>
@@ -284,29 +266,27 @@
         </div>
       </section>
 
-      <!-- TAB 4: GASTOS EXTRAS E IMPREVISTOS -->
+      <!-- TAB 4: GASTOS EXTRAS IMPREVISTOS -->
       <section id="tab-gastos-extras" class="tab-pane">
-        <div class="section-banner">
+        <div class="ios-section-banner">
           <div>
-            <h2>🚨 Hoja de Gastos Extras e Imprevistos</h2>
-            <p class="text-muted">Registro de compras surgidas a mitad de semana (hielos extra, reposición urgente de vasos de plástico, comida adicional).</p>
+            <h2>🚨 Gastos Extraordinarios e Imprevistos</h2>
+            <p class="ios-sub-desc">Reposición de hielos, vasos extra o imprevistos de última hora.</p>
           </div>
-          <button class="btn-primary" id="btn-add-gasto">+ Registrar Gasto Extra</button>
+          <button class="ios-btn-action" id="btn-add-gasto">+ Gasto Extra</button>
         </div>
 
-        <div class="section-actions" style="margin-top: 15px;">
-          <div class="search-bar">
-            <input type="text" id="search-gastos" placeholder="🔍 Buscar gasto imprevisto (hielos, vasos, comida)...">
-          </div>
+        <div class="ios-search-wrapper">
+          <input type="text" id="search-gastos" class="ios-search-input" placeholder="🔍 Buscar gasto imprevisto...">
         </div>
 
-        <div class="content-box excel-table-box">
+        <div class="ios-card ios-table-card">
           <div class="table-responsive">
-            <table class="data-table excel-table">
+            <table class="data-table ios-table">
               <thead>
                 <tr>
                   <th>#</th>
-                  <th>Concepto del Gasto Imprevisto</th>
+                  <th>Concepto Imprevisto</th>
                   <th>Categoría</th>
                   <th>Importe</th>
                   <th>Pagado Por</th>
@@ -324,56 +304,60 @@
 
       <!-- TAB 5: AJUSTES & BACKUP -->
       <section id="tab-ajustes" class="tab-pane">
-        <div class="settings-grid">
+        <div class="ios-settings-stack">
 
-          <div class="content-box">
-            <h2>⚙️ Configuración de Cuotas y Tarifas</h2>
-            <form id="form-config-tarifas" class="form-grid">
-              <div class="form-group">
-                <label>Cuota Estándar por Socio (€):</label>
+          <div class="ios-card">
+            <div class="ios-section-header">
+              <h2>⚙️ Cuotas y Tarifas</h2>
+            </div>
+            <form id="form-config-tarifas" class="ios-form">
+              <div class="ios-form-row">
+                <label>Cuota Socio (€):</label>
                 <input type="number" id="cfg-cuota-socio" min="0" step="5">
               </div>
-              <div class="form-group">
-                <label>Precio Total Alquiler Corralón (€):</label>
+              <div class="ios-form-row">
+                <label>Alquiler Corralón (€):</label>
                 <input type="number" id="cfg-total-corralon" min="0" step="10">
               </div>
-              <div class="form-group">
+              <div class="ios-form-row">
                 <label>Invitado - Día Suelto (€):</label>
                 <input type="number" id="cfg-tarifa-dia" min="0" step="1">
               </div>
-              <div class="form-group">
+              <div class="ios-form-row">
                 <label>Invitado - Fin de Semana (€):</label>
                 <input type="number" id="cfg-tarifa-finde" min="0" step="1">
               </div>
-              <div class="form-group">
-                <label>Invitado - Fiestas Completas 10 días (€):</label>
+              <div class="ios-form-row">
+                <label>Invitado - 10 días completo (€):</label>
                 <input type="number" id="cfg-tarifa-completo" min="0" step="1">
               </div>
-              <div class="form-group full-width">
-                <button type="submit" class="btn-primary admin-only">Guardar Configuración</button>
-              </div>
+              <button type="submit" class="ios-btn-submit admin-only" style="margin-top: 10px;">Guardar Cambios</button>
             </form>
           </div>
 
-          <div class="content-box">
-            <h2>🔑 PIN de Tesorero / Administrador</h2>
-            <p class="text-muted">Introduce el PIN para validar pagos, cambiar cuotas y aprobar gastos imprevistos.</p>
-            <div class="form-group" style="margin-top: 15px;">
-              <input type="password" id="input-pin-auth" placeholder="PIN por defecto: 1234">
-              <button id="btn-submit-pin" class="btn-primary" style="margin-top: 10px;">Desbloquear Modo Tesorero</button>
+          <div class="ios-card">
+            <div class="ios-section-header">
+              <h2>🔑 Modo Tesorero (PIN)</h2>
             </div>
+            <p class="ios-sub-desc">PIN por defecto: 1234. Permite validar cobros y cambiar datos.</p>
+            <div class="ios-form-row" style="margin-top: 10px;">
+              <input type="password" id="input-pin-auth" class="ios-search-input" placeholder="Introduce PIN">
+            </div>
+            <button id="btn-submit-pin" class="ios-btn-submit" style="margin-top: 10px;">Desbloquear Modo Tesorero</button>
           </div>
 
-          <div class="content-box full-width">
-            <h2>💾 Copia de Seguridad Tipo Excel / JSON</h2>
-            <p class="text-muted">Descarga un archivo completo con la contabilidad de la peña para guardarlo o compartirlo por WhatsApp.</p>
-            <div class="backup-actions">
-              <button id="btn-export-json" class="btn-secondary">📥 Descargar Copia JSON</button>
-              <label for="input-import-json" class="btn-secondary" style="cursor: pointer; display: inline-block;">
-                📤 Importar Copia JSON
+          <div class="ios-card">
+            <div class="ios-section-header">
+              <h2>💾 Copia de Seguridad</h2>
+            </div>
+            <p class="ios-sub-desc">Exporta todas las cuentas a un archivo para enviarlo por WhatsApp.</p>
+            <div class="ios-btn-group" style="margin-top: 12px;">
+              <button id="btn-export-json" class="ios-pill-btn">📥 Exportar Copia JSON</button>
+              <label for="input-import-json" class="ios-pill-btn" style="cursor: pointer;">
+                📤 Importar JSON
               </label>
               <input type="file" id="input-import-json" accept=".json" style="display: none;">
-              <button id="btn-reset-data" class="btn-danger admin-only">⚠️ Cargar Datos Ejemplo de Prueba</button>
+              <button id="btn-reset-data" class="ios-btn-danger admin-only">⚠️ Resetear Datos Prueba</button>
             </div>
           </div>
 
@@ -381,13 +365,38 @@
       </section>
 
     </main>
+
+    <!-- iOS Bottom Navigation Tab Bar (Apple Native Feel) -->
+    <nav class="ios-tab-bar">
+      <button class="ios-tab-item active" data-tab="tab-dashboard">
+        <span class="ios-tab-icon">📊</span>
+        <span class="ios-tab-label">Dashboard</span>
+      </button>
+      <button class="ios-tab-item" data-tab="tab-compras-comunes">
+        <span class="ios-tab-icon">🛒</span>
+        <span class="ios-tab-label">Compras</span>
+      </button>
+      <button class="ios-tab-item" data-tab="tab-peñistas">
+        <span class="ios-tab-icon">👥</span>
+        <span class="ios-tab-label">Peñistas</span>
+      </button>
+      <button class="ios-tab-item" data-tab="tab-gastos-extras">
+        <span class="ios-tab-icon">🚨</span>
+        <span class="ios-tab-label">Extras</span>
+      </button>
+      <button class="ios-tab-item" data-tab="tab-ajustes">
+        <span class="ios-tab-icon">⚙️</span>
+        <span class="ios-tab-label">Ajustes</span>
+      </button>
+    </nav>
   </div>
 
-  <!-- MODALS -->
+  <!-- iOS Action Sheet Modals (Slide-up from Bottom) -->
 
   <!-- Modal Socio -->
   <div id="modal-socio" class="modal-backdrop">
-    <div class="modal-card">
+    <div class="ios-modal-card">
+      <div class="ios-drag-handle"></div>
       <div class="modal-header">
         <h3 id="modal-socio-title">Añadir Peñista</h3>
         <button class="modal-close">&times;</button>
@@ -416,14 +425,15 @@
 
   <!-- Modal Pago Socio -->
   <div id="modal-pago-socio" class="modal-backdrop">
-    <div class="modal-card">
+    <div class="ios-modal-card">
+      <div class="ios-drag-handle"></div>
       <div class="modal-header">
         <h3>Anotar Pago de Peñista</h3>
         <button class="modal-close">&times;</button>
       </div>
       <form id="form-pago-socio">
         <input type="hidden" id="pago-socio-id">
-        <p>Anotar entrega de dinero para: <strong id="pago-socio-nombre">---</strong></p>
+        <p>Entrega de dinero para: <strong id="pago-socio-nombre">---</strong></p>
         <p>Falta por pagar: <strong id="pago-socio-pendiente" class="text-danger">0 €</strong></p>
         <div class="form-group" style="margin-top: 15px;">
           <label>Cantidad entregada hoy (€):</label>
@@ -439,7 +449,8 @@
 
   <!-- Modal Invitado -->
   <div id="modal-invitado" class="modal-backdrop">
-    <div class="modal-card">
+    <div class="ios-modal-card">
+      <div class="ios-drag-handle"></div>
       <div class="modal-header">
         <h3 id="modal-invitado-title">Registrar Invitado</h3>
         <button class="modal-close">&times;</button>
@@ -488,11 +499,12 @@
     </div>
   </div>
 
-  <!-- Modal Compra Común (Cálculo Automático Unidades × Precio) -->
+  <!-- Modal Compra Común -->
   <div id="modal-compra" class="modal-backdrop">
-    <div class="modal-card">
+    <div class="ios-modal-card">
+      <div class="ios-drag-handle"></div>
       <div class="modal-header">
-        <h3 id="modal-compra-title">Añadir Compra Común (Bote General)</h3>
+        <h3 id="modal-compra-title">Añadir Compra Común</h3>
         <button class="modal-close">&times;</button>
       </div>
       <form id="form-compra">
@@ -500,17 +512,17 @@
         
         <div class="form-group">
           <label>Nombre del Producto / Compra:</label>
-          <input type="text" id="compra-nombre" required placeholder="Ej. Ron Barceló 1L, Red Label 1L, Coca-Cola 2L, Altavoz">
+          <input type="text" id="compra-nombre" required placeholder="Ej. Ron Barceló 1L, Red Label 1L, Coca-Cola 2L">
         </div>
 
         <div class="form-grid">
           <div class="form-group">
-            <label>Cantidad (Unidades):</label>
-            <input type="number" id="compra-unidades" required min="1" step="1" value="1" placeholder="Ej. 40">
+            <label>Cantidad (Uds):</label>
+            <input type="number" id="compra-unidades" required min="1" step="1" value="1">
           </div>
           <div class="form-group">
-            <label>Formato de Envase:</label>
-            <input type="text" id="compra-formato" required placeholder="Ej. Botellas 1L, Botellas 2L, Unidades">
+            <label>Formato:</label>
+            <input type="text" id="compra-formato" required placeholder="Ej. Botellas 1L, Botellas 2L">
           </div>
         </div>
 
@@ -528,12 +540,12 @@
 
         <div class="form-grid">
           <div class="form-group">
-            <label>Precio por Unidad / Botella (€):</label>
+            <label>Precio / Ud (€):</label>
             <input type="number" id="compra-precio-unitario" required min="0" step="0.1" placeholder="Ej. 13.50">
           </div>
           <div class="form-group">
             <label>⚡ Total Calculado (€):</label>
-            <input type="number" id="compra-precio-total" readonly style="background: #f1f5f9; font-weight: 700; color: #15803d;">
+            <input type="number" id="compra-precio-total" readonly style="background: #f1f5f9; font-weight: 700; color: #16a34a;">
           </div>
         </div>
 
@@ -555,7 +567,8 @@
 
   <!-- Modal Gasto Extra / Imprevisto -->
   <div id="modal-gasto" class="modal-backdrop">
-    <div class="modal-card">
+    <div class="ios-modal-card">
+      <div class="ios-drag-handle"></div>
       <div class="modal-header">
         <h3 id="modal-gasto-title">Registrar Gasto Extra / Imprevisto</h3>
         <button class="modal-close">&times;</button>
@@ -567,7 +580,7 @@
           <input type="text" id="gasto-concepto" required placeholder="Ej. Reposición de hielos a mitad de semana, Vasos extra">
         </div>
         <div class="form-group">
-          <label>Categoría del Gasto Extra:</label>
+          <label>Categoría:</label>
           <select id="gasto-categoria" required>
             <option value="imprevisto_bebida">🍷 Reposición de Bebida / Hielos</option>
             <option value="imprevisto_comida">🥩 Comida Extra / Imprevista</option>
@@ -577,7 +590,7 @@
           </select>
         </div>
         <div class="form-group">
-          <label>Importe del Gasto Extra (€):</label>
+          <label>Importe (€):</label>
           <input type="number" id="gasto-importe" required min="1" step="0.5">
         </div>
         <div class="form-group">
@@ -588,7 +601,7 @@
           </select>
         </div>
         <div class="form-group">
-          <label>Estado de Aprobación:</label>
+          <label>Estado:</label>
           <select id="gasto-estado">
             <option value="aprobado">Aprobado por Tesorero</option>
             <option value="pendiente">Pendiente de Revisión</option>

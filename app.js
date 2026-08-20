@@ -105,21 +105,31 @@ document.addEventListener('DOMContentLoaded', () => {
   renderAll();
 });
 
-// Navigation Tabs
+// Navigation Tabs (Sincronizado con la barra de navegación de iOS)
 function setupNavigation() {
-  const tabs = document.querySelectorAll('.nav-tab');
+  const tabs = document.querySelectorAll('.nav-tab, .ios-tab-item');
   tabs.forEach(tab => {
     tab.addEventListener('click', () => {
-      tabs.forEach(t => t.classList.remove('active'));
+      const targetId = tab.dataset.tab;
+      
+      document.querySelectorAll('.nav-tab, .ios-tab-item').forEach(t => {
+        if (t.dataset.tab === targetId) {
+          t.classList.add('active');
+        } else {
+          t.classList.remove('active');
+        }
+      });
+
       document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
       
-      tab.classList.add('active');
-      const targetId = tab.dataset.tab;
-      document.getElementById(targetId).classList.add('active');
+      const targetPane = document.getElementById(targetId);
+      if (targetPane) targetPane.classList.add('active');
 
       if (targetId === 'tab-dashboard') {
         renderCharts();
       }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   });
 }
@@ -149,7 +159,7 @@ function setupSubTabs() {
 }
 
 window.switchTab = function(tabId) {
-  const tabBtn = document.querySelector(`.nav-tab[data-tab="${tabId}"]`);
+  const tabBtn = document.querySelector(`[data-tab="${tabId}"]`);
   if (tabBtn) tabBtn.click();
 };
 
