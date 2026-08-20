@@ -1,12 +1,12 @@
-// Peña Los Intratables - Almodóvar del Campo App Logic (V9 - Usuarios Únicos: Daniel López, Daniel García, Antonio Horta)
+// Peña Los Intratables - Almodóvar del Campo App Logic (V10 - Únicamente Peñistas Socios: Daniel López, Daniel García, Antonio Horta)
 
-const STORAGE_KEY = 'intratables_peña_db_v9';
+const STORAGE_KEY = 'intratables_peña_db_v10';
 
 // Instancias globales de gráficos Chart.js
 let chartGastoCatInstance = null;
 let chartPresupuestoVsRealInstance = null;
 
-// Usuarios autorizados de la Peña
+// Datos por defecto exclusivamente con los 3 peñistas socios autorizados
 const DEFAULT_DATA = {
   config: {
     cuotaSocio: 120,
@@ -24,39 +24,10 @@ const DEFAULT_DATA = {
   socios: [
     { id: 'soc_1', nombre: 'Daniel López', cuota: 120, pagado: 120 },
     { id: 'soc_2', nombre: 'Daniel García', cuota: 120, pagado: 120 },
-    { id: 'soc_3', nombre: 'Antonio Horta', cuota: 120, pagado: 120 },
-    { id: 'soc_4', nombre: 'Carlos "El Mula"', cuota: 120, pagado: 120 },
-    { id: 'soc_5', nombre: 'Álvaro "Pacheco"', cuota: 120, pagado: 60 },
-    { id: 'soc_6', nombre: 'David G.', cuota: 120, pagado: 120 },
-    { id: 'soc_7', nombre: 'Jesús M.', cuota: 120, pagado: 0 },
-    { id: 'soc_8', nombre: 'Manuel Fernández', cuota: 120, pagado: 120 },
-    { id: 'soc_9', nombre: 'Javier Ruiz', cuota: 120, pagado: 120 },
-    { id: 'soc_10', nombre: 'Alejandro "Titi"', cuota: 120, pagado: 60 },
-    { id: 'soc_11', nombre: 'Pablo Moreno', cuota: 120, pagado: 0 },
-    { id: 'soc_12', nombre: 'Gonzalo Santos', cuota: 120, pagado: 120 },
-    { id: 'soc_13', nombre: 'Adrián "Pepo"', cuota: 120, pagado: 120 },
-    { id: 'soc_14', nombre: 'Rubén "Chispas"', cuota: 120, pagado: 0 },
-    { id: 'soc_15', nombre: 'Jorge L.', cuota: 120, pagado: 120 },
-    { id: 'soc_16', nombre: 'Marcos R.', cuota: 120, pagado: 120 },
-    { id: 'soc_17', nombre: 'Víctor M.', cuota: 120, pagado: 60 },
-    { id: 'soc_18', nombre: 'Raúl C.', cuota: 120, pagado: 120 },
-    { id: 'soc_19', nombre: 'Alberto B.', cuota: 120, pagado: 0 },
-    { id: 'soc_20', nombre: 'Sergio K.', cuota: 120, pagado: 120 },
-    { id: 'soc_21', nombre: 'Borja T.', cuota: 120, pagado: 120 },
-    { id: 'soc_22', nombre: 'Jaime P.', cuota: 120, pagado: 120 },
-    { id: 'soc_23', nombre: 'Oscar L.', cuota: 120, pagado: 60 },
-    { id: 'soc_24', nombre: 'Mario V.', cuota: 120, pagado: 120 },
-    { id: 'soc_25', nombre: 'Diego H.', cuota: 120, pagado: 0 },
-    { id: 'soc_26', nombre: 'Iván S.', cuota: 120, pagado: 120 },
-    { id: 'soc_27', nombre: 'Fernando G.', cuota: 120, pagado: 120 },
-    { id: 'soc_28', nombre: 'Hugo N.', cuota: 120, pagado: 60 },
-    { id: 'soc_29', nombre: 'Guillermo F.', cuota: 120, pagado: 120 },
-    { id: 'soc_30', nombre: 'Lucas E.', cuota: 120, pagado: 120 }
+    { id: 'soc_3', nombre: 'Antonio Horta', cuota: 120, pagado: 120 }
   ],
   invitados: [
-    { id: 'inv_1', nombre: 'Andrés (Primo Carlos)', anfitrionId: 'soc_4', modalidad: 'finde1', detalleDia: '1er Fin de Semana', importe: 35, estado: 'pagado' },
-    { id: 'inv_2', nombre: 'Marta R.', anfitrionId: 'soc_1', modalidad: 'dia', detalleDia: 'Sábado 1er Finde', importe: 15, estado: 'pagado' },
-    { id: 'inv_3', nombre: 'Roberto K.', anfitrionId: 'soc_7', modalidad: 'completo', detalleDia: 'Fiestas 10 días', importe: 70, estado: 'pendiente' }
+    { id: 'inv_1', nombre: 'Carlos (Amigo de Daniel)', anfitrionId: 'soc_1', modalidad: 'finde1', detalleDia: '1er Fin de Semana', importe: 35, estado: 'pagado' }
   ],
   compras: [
     { id: 'cmp_1', nombre: 'Ron Ron Barceló', cantidad: '40 botellas (1L)', categoria: 'alcohol', precio: 540, estado: 'comprado' },
@@ -69,8 +40,7 @@ const DEFAULT_DATA = {
   ],
   gastos: [
     { id: 'gst_1', concepto: 'Reposición urgente de hielos y 20 botellas 2L Coca-Cola', categoria: 'imprevisto_bebida', importe: 65, compradorId: 'soc_1', estado: 'aprobado' },
-    { id: 'gst_2', concepto: 'Paquete extra 500 vasos plástico y servilletas', categoria: 'imprevisto_menaje', importe: 25, compradorId: 'soc_6', estado: 'aprobado' },
-    { id: 'gst_3', concepto: 'Compra suplementaria de carne para migas miércoles', categoria: 'imprevisto_comida', importe: 75, compradorId: 'soc_4', estado: 'aprobado' }
+    { id: 'gst_2', concepto: 'Paquete extra 500 vasos plástico y servilletas', categoria: 'imprevisto_menaje', importe: 25, compradorId: 'soc_2', estado: 'aprobado' }
   ]
 };
 
