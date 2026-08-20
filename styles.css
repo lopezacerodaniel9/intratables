@@ -78,6 +78,53 @@ body.authenticated .ios-session-banner {
   font-weight: 600;
 }
 
+/* Logo de la Peña */
+.ios-app-logo {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 2px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.peña-hero-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 1.5px solid #cbd5e1;
+  border-radius: 16px;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.peña-hero-logo {
+  width: 90px;
+  height: 90px;
+  object-fit: contain;
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid #cbd5e1;
+  padding: 4px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.peña-hero-info h2 {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.3px;
+  margin-bottom: 4px;
+}
+
+.peña-hero-info p {
+  font-size: 0.88rem;
+  color: #64748b;
+}
+
 /* ==========================================================================
    DESKTOP / PC STYLES (>= 768px) - ESTÉTICA TIPO HOJA DE CÁLCULO EXCEL
    ========================================================================== */
@@ -452,6 +499,31 @@ body.authenticated .ios-session-banner {
     display: flex;
     align-items: center;
     gap: 8px;
+  }
+
+  .ios-app-logo {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+  }
+
+  .peña-hero-card {
+    padding: 12px 14px;
+    gap: 12px;
+  }
+
+  .peña-hero-logo {
+    width: 68px;
+    height: 68px;
+    border-radius: 10px;
+  }
+
+  .peña-hero-info h2 {
+    font-size: 1.1rem;
+  }
+
+  .peña-hero-info p {
+    font-size: 0.78rem;
   }
 
   .ios-app-icon { font-size: 1.5rem; }
