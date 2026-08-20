@@ -1,12 +1,12 @@
-// Peña Los Intratables - Almodóvar del Campo App Logic (V8 - Registro e Inicio de Sesión de Usuarios)
+// Peña Los Intratables - Almodóvar del Campo App Logic (V9 - Usuarios Únicos: Daniel López, Daniel García, Antonio Horta)
 
-const STORAGE_KEY = 'intratables_peña_db_v8';
+const STORAGE_KEY = 'intratables_peña_db_v9';
 
 // Instancias globales de gráficos Chart.js
 let chartGastoCatInstance = null;
 let chartPresupuestoVsRealInstance = null;
 
-// Datos de inicio por defecto con Usuarios Registrados
+// Usuarios autorizados de la Peña
 const DEFAULT_DATA = {
   config: {
     cuotaSocio: 120,
@@ -17,44 +17,46 @@ const DEFAULT_DATA = {
     fechaFiestas: '2026-09-12T12:00:00'
   },
   usuarios: [
-    { id: 'usr_admin', usuario: 'Intratables', clave: 'admin1234', nombre: 'Tesorero Intratable', rol: 'admin' }
+    { id: 'usr_1', nombre: 'Daniel López', usuario: 'daniel.lopez', clave: 'admin1234', rol: 'admin' },
+    { id: 'usr_2', nombre: 'Daniel García', usuario: 'daniel.garcia', clave: 'admin1234', rol: 'admin' },
+    { id: 'usr_3', nombre: 'Antonio Horta', usuario: 'antonio.horta', clave: 'admin1234', rol: 'admin' }
   ],
   socios: [
-    { id: 'soc_1', nombre: 'Daniel Lacero', cuota: 120, pagado: 120 },
-    { id: 'soc_2', nombre: 'Carlos "El Mula"', cuota: 120, pagado: 120 },
-    { id: 'soc_3', nombre: 'Álvaro "Pacheco"', cuota: 120, pagado: 60 },
-    { id: 'soc_4', nombre: 'David G.', cuota: 120, pagado: 120 },
-    { id: 'soc_5', nombre: 'Jesús M.', cuota: 120, pagado: 0 },
-    { id: 'soc_6', nombre: 'Manuel Fernández', cuota: 120, pagado: 120 },
-    { id: 'soc_7', nombre: 'Javier Ruiz', cuota: 120, pagado: 120 },
-    { id: 'soc_8', nombre: 'Alejandro "Titi"', cuota: 120, pagado: 60 },
-    { id: 'soc_9', nombre: 'Pablo Moreno', cuota: 120, pagado: 0 },
-    { id: 'soc_10', nombre: 'Gonzalo Santos', cuota: 120, pagado: 120 },
-    { id: 'soc_11', nombre: 'Adrián "Pepo"', cuota: 120, pagado: 120 },
-    { id: 'soc_12', nombre: 'Rubén "Chispas"', cuota: 120, pagado: 0 },
-    { id: 'soc_13', nombre: 'Jorge L.', cuota: 120, pagado: 120 },
-    { id: 'soc_14', nombre: 'Marcos R.', cuota: 120, pagado: 120 },
-    { id: 'soc_15', nombre: 'Víctor M.', cuota: 120, pagado: 60 },
-    { id: 'soc_16', nombre: 'Raúl C.', cuota: 120, pagado: 120 },
-    { id: 'soc_17', nombre: 'Alberto B.', cuota: 120, pagado: 0 },
-    { id: 'soc_18', nombre: 'Sergio K.', cuota: 120, pagado: 120 },
-    { id: 'soc_19', nombre: 'Borja T.', cuota: 120, pagado: 120 },
-    { id: 'soc_20', nombre: 'Jaime P.', cuota: 120, pagado: 120 },
-    { id: 'soc_21', nombre: 'Oscar L.', cuota: 120, pagado: 60 },
-    { id: 'soc_22', nombre: 'Mario V.', cuota: 120, pagado: 120 },
-    { id: 'soc_23', nombre: 'Diego H.', cuota: 120, pagado: 0 },
-    { id: 'soc_24', nombre: 'Iván S.', cuota: 120, pagado: 120 },
-    { id: 'soc_25', nombre: 'Fernando G.', cuota: 120, pagado: 120 },
-    { id: 'soc_26', nombre: 'Hugo N.', cuota: 120, pagado: 60 },
-    { id: 'soc_27', nombre: 'Guillermo F.', cuota: 120, pagado: 120 },
-    { id: 'soc_28', nombre: 'Lucas E.', cuota: 120, pagado: 120 },
-    { id: 'soc_29', nombre: 'Enrique M.', cuota: 120, pagado: 0 },
-    { id: 'soc_30', nombre: 'Emilio P.', cuota: 120, pagado: 120 }
+    { id: 'soc_1', nombre: 'Daniel López', cuota: 120, pagado: 120 },
+    { id: 'soc_2', nombre: 'Daniel García', cuota: 120, pagado: 120 },
+    { id: 'soc_3', nombre: 'Antonio Horta', cuota: 120, pagado: 120 },
+    { id: 'soc_4', nombre: 'Carlos "El Mula"', cuota: 120, pagado: 120 },
+    { id: 'soc_5', nombre: 'Álvaro "Pacheco"', cuota: 120, pagado: 60 },
+    { id: 'soc_6', nombre: 'David G.', cuota: 120, pagado: 120 },
+    { id: 'soc_7', nombre: 'Jesús M.', cuota: 120, pagado: 0 },
+    { id: 'soc_8', nombre: 'Manuel Fernández', cuota: 120, pagado: 120 },
+    { id: 'soc_9', nombre: 'Javier Ruiz', cuota: 120, pagado: 120 },
+    { id: 'soc_10', nombre: 'Alejandro "Titi"', cuota: 120, pagado: 60 },
+    { id: 'soc_11', nombre: 'Pablo Moreno', cuota: 120, pagado: 0 },
+    { id: 'soc_12', nombre: 'Gonzalo Santos', cuota: 120, pagado: 120 },
+    { id: 'soc_13', nombre: 'Adrián "Pepo"', cuota: 120, pagado: 120 },
+    { id: 'soc_14', nombre: 'Rubén "Chispas"', cuota: 120, pagado: 0 },
+    { id: 'soc_15', nombre: 'Jorge L.', cuota: 120, pagado: 120 },
+    { id: 'soc_16', nombre: 'Marcos R.', cuota: 120, pagado: 120 },
+    { id: 'soc_17', nombre: 'Víctor M.', cuota: 120, pagado: 60 },
+    { id: 'soc_18', nombre: 'Raúl C.', cuota: 120, pagado: 120 },
+    { id: 'soc_19', nombre: 'Alberto B.', cuota: 120, pagado: 0 },
+    { id: 'soc_20', nombre: 'Sergio K.', cuota: 120, pagado: 120 },
+    { id: 'soc_21', nombre: 'Borja T.', cuota: 120, pagado: 120 },
+    { id: 'soc_22', nombre: 'Jaime P.', cuota: 120, pagado: 120 },
+    { id: 'soc_23', nombre: 'Oscar L.', cuota: 120, pagado: 60 },
+    { id: 'soc_24', nombre: 'Mario V.', cuota: 120, pagado: 120 },
+    { id: 'soc_25', nombre: 'Diego H.', cuota: 120, pagado: 0 },
+    { id: 'soc_26', nombre: 'Iván S.', cuota: 120, pagado: 120 },
+    { id: 'soc_27', nombre: 'Fernando G.', cuota: 120, pagado: 120 },
+    { id: 'soc_28', nombre: 'Hugo N.', cuota: 120, pagado: 60 },
+    { id: 'soc_29', nombre: 'Guillermo F.', cuota: 120, pagado: 120 },
+    { id: 'soc_30', nombre: 'Lucas E.', cuota: 120, pagado: 120 }
   ],
   invitados: [
-    { id: 'inv_1', nombre: 'Andrés (Primo Carlos)', anfitrionId: 'soc_2', modalidad: 'finde1', detalleDia: '1er Fin de Semana', importe: 35, estado: 'pagado' },
+    { id: 'inv_1', nombre: 'Andrés (Primo Carlos)', anfitrionId: 'soc_4', modalidad: 'finde1', detalleDia: '1er Fin de Semana', importe: 35, estado: 'pagado' },
     { id: 'inv_2', nombre: 'Marta R.', anfitrionId: 'soc_1', modalidad: 'dia', detalleDia: 'Sábado 1er Finde', importe: 15, estado: 'pagado' },
-    { id: 'inv_3', nombre: 'Roberto K.', anfitrionId: 'soc_5', modalidad: 'completo', detalleDia: 'Fiestas 10 días', importe: 70, estado: 'pendiente' }
+    { id: 'inv_3', nombre: 'Roberto K.', anfitrionId: 'soc_7', modalidad: 'completo', detalleDia: 'Fiestas 10 días', importe: 70, estado: 'pendiente' }
   ],
   compras: [
     { id: 'cmp_1', nombre: 'Ron Ron Barceló', cantidad: '40 botellas (1L)', categoria: 'alcohol', precio: 540, estado: 'comprado' },
@@ -67,8 +69,8 @@ const DEFAULT_DATA = {
   ],
   gastos: [
     { id: 'gst_1', concepto: 'Reposición urgente de hielos y 20 botellas 2L Coca-Cola', categoria: 'imprevisto_bebida', importe: 65, compradorId: 'soc_1', estado: 'aprobado' },
-    { id: 'gst_2', concepto: 'Paquete extra 500 vasos plástico y servilletas', categoria: 'imprevisto_menaje', importe: 25, compradorId: 'soc_4', estado: 'aprobado' },
-    { id: 'gst_3', concepto: 'Compra suplementaria de carne para migas miércoles', categoria: 'imprevisto_comida', importe: 75, compradorId: 'soc_2', estado: 'aprobado' }
+    { id: 'gst_2', concepto: 'Paquete extra 500 vasos plástico y servilletas', categoria: 'imprevisto_menaje', importe: 25, compradorId: 'soc_6', estado: 'aprobado' },
+    { id: 'gst_3', concepto: 'Compra suplementaria de carne para migas miércoles', categoria: 'imprevisto_comida', importe: 75, compradorId: 'soc_4', estado: 'aprobado' }
   ]
 };
 
@@ -82,7 +84,6 @@ function loadData() {
     try {
       const data = JSON.parse(saved);
       if (!data.compras) data.compras = JSON.parse(JSON.stringify(DEFAULT_DATA.compras));
-      if (!data.usuarios) data.usuarios = JSON.parse(JSON.stringify(DEFAULT_DATA.usuarios));
       return data;
     } catch (e) {
       console.error('Error al cargar LocalStorage:', e);
@@ -231,14 +232,18 @@ function setupAuthControls() {
     const usr = document.getElementById('login-usuario').value.trim();
     const pass = document.getElementById('login-clave').value.trim();
 
-    const found = db.usuarios.find(u => u.usuario.toLowerCase() === usr.toLowerCase() && u.clave === pass);
+    // Permite login por usuario (ej. daniel.lopez) o por nombre completo (ej. Daniel López)
+    const found = db.usuarios.find(u => 
+      (u.usuario.toLowerCase() === usr.toLowerCase() || u.nombre.toLowerCase() === usr.toLowerCase()) && 
+      u.clave === pass
+    );
 
     if (found) {
       saveSession(found);
       closeModals();
-      alert(`🎉 ¡Bienvenido ${found.nombre}! Modo Tesorero activado.`);
+      alert(`🎉 ¡Bienvenido ${found.nombre}! Sesión iniciada.`);
     } else {
-      alert('❌ Usuario o contraseña incorrectos.\nUsuario por defecto: Intratables\nContraseña por defecto: admin1234');
+      alert('❌ Usuario o contraseña incorrectos.\nUsuarios autorizados:\n- Daniel López (clave: admin1234)\n- Daniel García (clave: admin1234)\n- Antonio Horta (clave: admin1234)');
     }
   });
 
@@ -250,7 +255,7 @@ function setupAuthControls() {
     const clave = document.getElementById('reg-clave').value.trim();
 
     if (db.usuarios.some(u => u.usuario.toLowerCase() === usuario.toLowerCase())) {
-      alert('⚠️ Este nombre de usuario ya está registrado. Elige otro.');
+      alert('⚠️ Este nombre de usuario ya existe. Elige otro.');
       return;
     }
 
@@ -298,7 +303,7 @@ function updateAuthUI() {
     document.body.classList.add('authenticated');
     userStatusIcon.textContent = '👤';
     userStatusText.textContent = currentUser.nombre;
-    sessionBanner.innerHTML = `<span>🟢 Sesión Activa: <strong>${escapeHTML(currentUser.nombre)}</strong> (${escapeHTML(currentUser.usuario)})</span> <button onclick="saveSession(null)" class="ios-link-btn" style="color: #dc2626;">Salir 🚪</button>`;
+    sessionBanner.innerHTML = `<span>🟢 Sesión Activa: <strong>${escapeHTML(currentUser.nombre)}</strong></span> <button onclick="saveSession(null)" class="ios-link-btn" style="color: #dc2626;">Salir 🚪</button>`;
   } else {
     document.body.classList.add('read-only');
     document.body.classList.remove('authenticated');
@@ -317,8 +322,8 @@ function renderUsuariosList() {
 
   ul.innerHTML = db.usuarios.map(u => `
     <li>
-      <span>👤 <strong>${escapeHTML(u.nombre)}</strong> (${escapeHTML(u.usuario)})</span>
-      <span class="badge badge-success">${u.rol === 'admin' ? 'Administrador' : 'Tesorero'}</span>
+      <span>👤 <strong>${escapeHTML(u.nombre)}</strong> (usuario: <code>${escapeHTML(u.usuario)}</code>)</span>
+      <span class="badge badge-success">Autorizado</span>
     </li>
   `).join('');
 }
@@ -1022,7 +1027,6 @@ function setupFormsAndModals() {
         if (imported.socios && imported.gastos) {
           db = imported;
           if (!db.compras) db.compras = JSON.parse(JSON.stringify(DEFAULT_DATA.compras));
-          if (!db.usuarios) db.usuarios = JSON.parse(JSON.stringify(DEFAULT_DATA.usuarios));
           saveData();
           alert('🎉 Cuentas importadas con éxito.');
         } else {
