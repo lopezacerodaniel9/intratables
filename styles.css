@@ -132,6 +132,11 @@ body.authenticated .ios-session-banner {
     gap: 20px;
     align-items: start;
   }
+
+  .app-body-layout.no-sidebar {
+    display: block !important;
+    width: 100% !important;
+  }
 }
 
 .sidebar-gallery {
@@ -1044,4 +1049,72 @@ body.authenticated .ios-session-banner {
 
 body.read-only .admin-only {
   display: none !important;
+}
+
+/* Modal Lightbox para Ampliar Fotos de la Peña */
+.sidebar-photo-img, .peña-hero-logo {
+  cursor: pointer;
+}
+
+.modal-lightbox-backdrop {
+  background: rgba(0, 0, 0, 0.92) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  z-index: 2000 !important;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  padding: 16px;
+}
+
+.modal-lightbox-backdrop.active {
+  display: flex !important;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.lightbox-content {
+  position: relative;
+  max-width: 95vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.lightbox-image {
+  max-width: 92vw;
+  max-height: 82vh;
+  object-fit: contain;
+  border-radius: 16px;
+  box-shadow: 0 16px 50px rgba(0, 0, 0, 0.7);
+  border: 2px solid rgba(255, 255, 255, 0.25);
+}
+
+.lightbox-caption {
+  color: #ffffff;
+  margin-top: 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  text-align: center;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+}
+
+.lightbox-close {
+  position: absolute;
+  top: -16px;
+  right: -16px;
+  background: #ffffff;
+  color: #0f172a;
+  border: none;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  font-size: 1.5rem;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  z-index: 10;
 }

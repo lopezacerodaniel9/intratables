@@ -94,6 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupFiltersAndSearch();
   setupFormsAndModals();
   setupAuthControls();
+  setupPhotoLightbox();
   startCountdownTimer();
   updateAuthUI();
   renderAll();
@@ -119,18 +120,58 @@ function setupNavigation() {
       const targetPane = document.getElementById(targetId);
       if (targetPane) targetPane.classList.add('active');
 
-      // Las fotos de la peña sólo aparecen en la pestaña Dashboard
+      // Las fotos de la peña sólo aparecen en el Dashboard. El resto ocupa todo el ancho de PC.
+      const appLayout = document.querySelector('.app-body-layout');
       const sidebarGallery = document.querySelector('.sidebar-gallery');
+      const isDashboard = targetId === 'tab-dashboard';
+
       if (sidebarGallery) {
-        sidebarGallery.style.display = targetId === 'tab-dashboard' ? 'block' : 'none';
+        sidebarGallery.style.display = isDashboard ? 'block' : 'none';
       }
 
-      if (targetId === 'tab-dashboard') {
+      if (appLayout) {
+        if (isDashboard) {
+          appLayout.classList.remove('no-sidebar');
+        } else {
+          appLayout.classList.add('no-sidebar');
+        }
+      }
+
+      if (isDashboard) {
         renderCharts();
       }
 
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
+  });
+}
+
+// Lightbox Visualizador de Fotos en Grande
+function setupPhotoLightbox() {
+  const modalLightbox = document.getElementById('modal-lightbox');
+  const lightboxImg = document.getElementById('lightbox-img');
+  const lightboxCaption = document.getElementById('lightbox-caption');
+  const btnClose = document.getElementById('btn-close-lightbox');
+
+  if (!modalLightbox) return;
+
+  document.addEventListener('click', e => {
+    const photoTarget = e.target.closest('.sidebar-photo-img, .peña-hero-logo');
+    if (photoTarget) {
+      lightboxImg.src = photoTarget.src;
+      lightboxCaption.textContent = photoTarget.alt || 'Foto oficial de la Peña Los Intratables';
+      modalLightbox.classList.add('active');
+    }
+  });
+
+  btnClose?.addEventListener('click', () => {
+    modalLightbox.classList.remove('active');
+  });
+
+  modalLightbox.addEventListener('click', e => {
+    if (e.target === modalLightbox) {
+      modalLightbox.classList.remove('active');
+    }
   });
 }
 
