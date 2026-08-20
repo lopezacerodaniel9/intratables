@@ -612,7 +612,7 @@ function renderSocios() {
     const pend = s.cuota - s.pagado;
     const isPagado = pend <= 0;
     const badgeClass = isPagado ? 'badge-success' : (s.pagado > 0 ? 'badge-warning' : 'badge-danger');
-    const badgeText = isPagado ? 'Pagado Total' : (s.pagado > 0 ? 'Parcial' : 'Falta por Pagar');
+    const badgeText = isPagado ? '✅ Pagado Total' : (s.pagado > 0 ? '⏳ Parcial' : '❌ Falta por Pagar');
 
     return `
       <tr>
@@ -624,7 +624,10 @@ function renderSocios() {
         <td><span class="badge ${badgeClass}">${badgeText}</span></td>
         <td class="text-right">
           ${currentUser ? `
-            ${!isPagado ? `<button class="btn-primary btn-sm admin-only" onclick="openModalPagoSocio('${s.id}')">💵 Añadir Pago</button>` : ''}
+            <button class="${isPagado ? 'btn-secondary' : 'btn-primary'} btn-sm admin-only" onclick="${isPagado ? `quickDesmarcarPagoSocio('${s.id}')` : `quickMarcarPagadoSocio('${s.id}')`}">
+              ${isPagado ? '🔄 Desmarcar' : `✅ Marcar Pagado (${pend}€)`}
+            </button>
+            <button class="btn-secondary btn-sm admin-only" onclick="openModalPagoSocio('${s.id}')">💵 Parcial</button>
             <button class="btn-secondary btn-sm admin-only" onclick="openModalSocio('${s.id}')">✏️</button>
             <button class="btn-danger btn-sm admin-only" onclick="deleteSocio('${s.id}')">🗑️</button>
           ` : '<span class="text-muted" style="font-size: 0.75rem;">Solo Lectura</span>'}
@@ -689,16 +692,21 @@ function renderInvitados() {
 
 // 5. Render Gastos Extras / Imprevistos
 let gastoSearchQuery = '';
+let gastoFilter = 'todos';
 
 function renderGastos() {
   const tbody = document.getElementById('tbody-gastos');
   let list = db.gastos.filter(g => {
-    return g.concepto.toLowerCase().includes(gastoSearchQuery.toLowerCase()) ||
-           g.categoria.toLowerCase().includes(gastoSearchQuery.toLowerCase());
+    const matchSearch = g.concepto.toLowerCase().includes(gastoSearchQuery.toLowerCase()) ||
+                        g.categoria.toLowerCase().includes(gastoSearchQuery.toLowerCase());
+    const isPagado = g.estado === 'aprobado';
+    if (gastoFilter === 'pendiente') return matchSearch && !isPagado;
+    if (gastoFilter === 'pagado') return matchSearch && isPagado;
+    return matchSearch;
   });
 
   if (list.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7" class="empty-msg">No hay gastos extras registrados a mitad de fiestas.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" class="empty-msg">No se encontraron gastos extras.</td></tr>`;
     return;
   }
 
@@ -728,12 +736,14 @@ function renderGastos() {
         <td>${escapeHTML(pagadoPorText)}</td>
         <td>
           <span class="badge ${isAprobado ? 'badge-success' : 'badge-warning'}">
-            ${isAprobado ? 'Aprobado' : 'Pendiente Revisión'}
+            ${isAprobado ? '✅ Pagado' : '⏳ Falta por Pagar'}
           </span>
         </td>
         <td class="text-right">
           ${currentUser ? `
-            ${!isAprobado ? `<button class="btn-primary btn-sm admin-only" onclick="aprobarGasto('${g.id}')">Aprobar</button>` : ''}
+            <button class="${isAprobado ? 'btn-secondary' : 'btn-primary'} btn-sm admin-only" onclick="toggleEstadoGasto('${g.id}')">
+              ${isAprobado ? '⏳ Marcar Pendiente' : '✅ Marcar Pagado'}
+            </button>
             <button class="btn-secondary btn-sm admin-only" onclick="openModalGasto('${g.id}')">✏️</button>
             <button class="btn-danger btn-sm admin-only" onclick="deleteGasto('${g.id}')">🗑️</button>
           ` : '<span class="text-muted" style="font-size: 0.75rem;">Solo Lectura</span>'}
@@ -790,10 +800,19 @@ function setupFiltersAndSearch() {
     renderInvitados();
   });
 
-  // Gastos Search
+  // Gastos Search & Filter
   document.getElementById('search-gastos').addEventListener('input', e => {
     gastoSearchQuery = e.target.value;
     renderGastos();
+  });
+
+  document.querySelectorAll('.filter-btn[data-filter-gasto], .ios-segment[data-filter-gasto]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn[data-filter-gasto], .ios-segment[data-filter-gasto]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      gastoFilter = btn.dataset.filterGasto;
+      renderGastos();
+    });
   });
 }
 
@@ -1204,6 +1223,33 @@ window.openModalGasto = function(id = null) {
   }
 
   modal.classList.add('active');
+};
+
+window.quickMarcarPagadoSocio = function(id) {
+  if (!currentUser) return openModalAuth();
+  const s = db.socios.find(item => item.id === id);
+  if (s) {
+    s.pagado = s.cuota;
+    saveData();
+  }
+};
+
+window.quickDesmarcarPagoSocio = function(id) {
+  if (!currentUser) return openModalAuth();
+  const s = db.socios.find(item => item.id === id);
+  if (s) {
+    s.pagado = 0;
+    saveData();
+  }
+};
+
+window.toggleEstadoGasto = function(id) {
+  if (!currentUser) return openModalAuth();
+  const g = db.gastos.find(item => item.id === id);
+  if (g) {
+    g.estado = g.estado === 'aprobado' ? 'pendiente' : 'aprobado';
+    saveData();
+  }
 };
 
 window.aprobarGasto = function(id) {

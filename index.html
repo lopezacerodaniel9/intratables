@@ -291,6 +291,11 @@
 
         <div class="ios-search-wrapper">
           <input type="text" id="search-gastos" class="ios-search-input" placeholder="🔍 Buscar gasto imprevisto...">
+          <div class="ios-segmented-control">
+            <button class="ios-segment active" data-filter-gasto="todos">Todos</button>
+            <button class="ios-segment" data-filter-gasto="pendiente">⏳ Faltan por Pagar</button>
+            <button class="ios-segment" data-filter-gasto="pagado">✅ Ya Pagados</button>
+          </div>
         </div>
 
         <div class="ios-card ios-table-card">
