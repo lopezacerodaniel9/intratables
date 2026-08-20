@@ -565,24 +565,27 @@ function renderCompras() {
 
     return `
       <tr>
-        <td><strong>${index + 1}</strong></td>
-        <td><strong>${escapeHTML(c.nombre)}</strong></td>
-        <td><span class="badge badge-warning" style="font-size: 0.85rem;">${escapeHTML(cantidadText)}</span></td>
-        <td>${catLabels[c.categoria] || c.categoria}</td>
-        <td><strong class="text-success" style="font-size: 0.95rem;">${pTotal} €</strong></td>
+        <td class="desktop-only"><strong>${index + 1}</strong></td>
         <td>
+          <div class="item-title"><strong>${escapeHTML(c.nombre)}</strong></div>
+          <div class="item-sub text-muted">${escapeHTML(cantidadText)} • <span class="text-success" style="font-weight:700;">${pTotal} €</span></div>
+        </td>
+        <td class="desktop-only"><span class="badge badge-warning" style="font-size: 0.85rem;">${escapeHTML(cantidadText)}</span></td>
+        <td class="desktop-only">${catLabels[c.categoria] || c.categoria}</td>
+        <td class="desktop-only"><strong class="text-success" style="font-size: 0.95rem;">${pTotal} €</strong></td>
+        <td class="desktop-only">
           <span class="badge ${isComprado ? 'badge-success' : 'badge-warning'}">
-            ${isComprado ? '✅ Ya Comprado' : '⏳ Pendiente'}
+            ${isComprado ? '✅ Comprado' : '⏳ Pendiente'}
           </span>
         </td>
         <td class="text-right">
           ${currentUser ? `
-            <button class="btn-secondary btn-sm" onclick="toggleEstadoCompra('${c.id}')">
-              ${isComprado ? 'Desmarcar' : '✅ Marcar Comprado'}
+            <button class="${isComprado ? 'btn-secondary' : 'btn-primary'} btn-sm" onclick="toggleEstadoCompra('${c.id}')">
+              ${isComprado ? '✅ Comprado' : '⏳ Comprar'}
             </button>
             <button class="btn-secondary btn-sm admin-only" onclick="openModalCompra('${c.id}')">✏️</button>
             <button class="btn-danger btn-sm admin-only" onclick="deleteCompra('${c.id}')">🗑️</button>
-          ` : '<span class="text-muted" style="font-size: 0.75rem;">Solo Lectura</span>'}
+          ` : `<span class="badge ${isComprado ? 'badge-success' : 'badge-warning'}">${isComprado ? '✅ Comprado' : '⏳ Pendiente'}</span>`}
         </td>
       </tr>
     `;
@@ -611,26 +614,25 @@ function renderSocios() {
   tbody.innerHTML = list.map((s, index) => {
     const pend = s.cuota - s.pagado;
     const isPagado = pend <= 0;
-    const badgeClass = isPagado ? 'badge-success' : (s.pagado > 0 ? 'badge-warning' : 'badge-danger');
-    const badgeText = isPagado ? '✅ Pagado Total' : (s.pagado > 0 ? '⏳ Parcial' : '❌ Falta por Pagar');
 
     return `
       <tr>
-        <td><strong>${index + 1}</strong></td>
-        <td><strong>${escapeHTML(s.nombre)}</strong></td>
-        <td>${s.cuota} €</td>
-        <td class="text-success">${s.pagado} €</td>
-        <td class="${pend > 0 ? 'text-danger' : 'text-muted'}">${pend > 0 ? pend + ' €' : '0 €'}</td>
-        <td><span class="badge ${badgeClass}">${badgeText}</span></td>
+        <td class="desktop-only"><strong>${index + 1}</strong></td>
+        <td>
+          <div class="item-title"><strong>${escapeHTML(s.nombre)}</strong></div>
+          <div class="item-sub text-muted">Cuota: <strong class="text-main">${s.cuota} €</strong> • <span class="${isPagado ? 'text-success' : 'text-danger'}" style="font-weight:700;">${isPagado ? 'Pagado' : 'Falta pagar ' + pend + '€'}</span></div>
+        </td>
+        <td class="desktop-only">${s.cuota} €</td>
+        <td class="desktop-only text-success">${s.pagado} €</td>
+        <td class="desktop-only"><span class="badge ${isPagado ? 'badge-success' : 'badge-danger'}">${isPagado ? '✅ Pagado' : '❌ Falta por Pagar'}</span></td>
         <td class="text-right">
           ${currentUser ? `
             <button class="${isPagado ? 'btn-secondary' : 'btn-primary'} btn-sm admin-only" onclick="${isPagado ? `quickDesmarcarPagoSocio('${s.id}')` : `quickMarcarPagadoSocio('${s.id}')`}">
-              ${isPagado ? '🔄 Desmarcar' : `✅ Marcar Pagado (${pend}€)`}
+              ${isPagado ? '✅ Pagado' : '❌ Pagar'}
             </button>
-            <button class="btn-secondary btn-sm admin-only" onclick="openModalPagoSocio('${s.id}')">💵 Parcial</button>
             <button class="btn-secondary btn-sm admin-only" onclick="openModalSocio('${s.id}')">✏️</button>
             <button class="btn-danger btn-sm admin-only" onclick="deleteSocio('${s.id}')">🗑️</button>
-          ` : '<span class="text-muted" style="font-size: 0.75rem;">Solo Lectura</span>'}
+          ` : `<span class="badge ${isPagado ? 'badge-success' : 'badge-danger'}">${isPagado ? '✅ Pagado' : '❌ Sin Pagar'}</span>`}
         </td>
       </tr>
     `;
@@ -667,23 +669,28 @@ function renderInvitados() {
 
     return `
       <tr>
-        <td><strong>${index + 1}</strong></td>
-        <td><strong>${escapeHTML(i.nombre)}</strong></td>
-        <td>${anfitrion ? escapeHTML(anfitrion.nombre) : 'Desconocido'}</td>
-        <td>${modalidadLabels[i.modalidad] || i.modalidad}</td>
-        <td>${escapeHTML(i.detalleDia || '-')}</td>
-        <td><strong>${i.importe} €</strong></td>
+        <td class="desktop-only"><strong>${index + 1}</strong></td>
         <td>
+          <div class="item-title"><strong>${escapeHTML(i.nombre)}</strong></div>
+          <div class="item-sub text-muted">Anfitrión: ${anfitrion ? escapeHTML(anfitrion.nombre) : '-'} • <strong>${i.importe} €</strong></div>
+        </td>
+        <td class="desktop-only">${anfitrion ? escapeHTML(anfitrion.nombre) : 'Desconocido'}</td>
+        <td class="desktop-only">${modalidadLabels[i.modalidad] || i.modalidad}</td>
+        <td class="desktop-only">${escapeHTML(i.detalleDia || '-')}</td>
+        <td class="desktop-only"><strong>${i.importe} €</strong></td>
+        <td class="desktop-only">
           <span class="badge ${isPagado ? 'badge-success' : 'badge-warning'}">
-            ${isPagado ? 'Pagado' : 'Falta por Pagar'}
+            ${isPagado ? '✅ Pagado' : '⏳ Falta por Pagar'}
           </span>
         </td>
         <td class="text-right">
           ${currentUser ? `
-            ${!isPagado ? `<button class="btn-primary btn-sm admin-only" onclick="togglePagoInvitado('${i.id}')">Mark Pagado</button>` : ''}
+            <button class="${isPagado ? 'btn-secondary' : 'btn-primary'} btn-sm admin-only" onclick="togglePagoInvitado('${i.id}')">
+              ${isPagado ? '✅ Pagado' : '⏳ Pagar'}
+            </button>
             <button class="btn-secondary btn-sm admin-only" onclick="openModalInvitado('${i.id}')">✏️</button>
             <button class="btn-danger btn-sm admin-only" onclick="deleteInvitado('${i.id}')">🗑️</button>
-          ` : '<span class="text-muted" style="font-size: 0.75rem;">Solo Lectura</span>'}
+          ` : `<span class="badge ${isPagado ? 'badge-success' : 'badge-warning'}">${isPagado ? '✅ Pagado' : '⏳ Pendiente'}</span>`}
         </td>
       </tr>
     `;
@@ -729,12 +736,15 @@ function renderGastos() {
 
     return `
       <tr>
-        <td><strong>${index + 1}</strong></td>
-        <td><strong>${escapeHTML(g.concepto)}</strong></td>
-        <td>${catLabels[g.categoria] || g.categoria}</td>
-        <td><strong class="text-danger">${g.importe} €</strong></td>
-        <td>${escapeHTML(pagadoPorText)}</td>
+        <td class="desktop-only"><strong>${index + 1}</strong></td>
         <td>
+          <div class="item-title"><strong>${escapeHTML(g.concepto)}</strong></div>
+          <div class="item-sub text-muted">${escapeHTML(pagadoPorText)} • <span class="text-danger" style="font-weight:700;">${g.importe} €</span></div>
+        </td>
+        <td class="desktop-only">${catLabels[g.categoria] || g.categoria}</td>
+        <td class="desktop-only"><strong class="text-danger">${g.importe} €</strong></td>
+        <td class="desktop-only">${escapeHTML(pagadoPorText)}</td>
+        <td class="desktop-only">
           <span class="badge ${isAprobado ? 'badge-success' : 'badge-warning'}">
             ${isAprobado ? '✅ Pagado' : '⏳ Falta por Pagar'}
           </span>
@@ -742,11 +752,11 @@ function renderGastos() {
         <td class="text-right">
           ${currentUser ? `
             <button class="${isAprobado ? 'btn-secondary' : 'btn-primary'} btn-sm admin-only" onclick="toggleEstadoGasto('${g.id}')">
-              ${isAprobado ? '⏳ Marcar Pendiente' : '✅ Marcar Pagado'}
+              ${isAprobado ? '✅ Pagado' : '⏳ Pagar'}
             </button>
             <button class="btn-secondary btn-sm admin-only" onclick="openModalGasto('${g.id}')">✏️</button>
             <button class="btn-danger btn-sm admin-only" onclick="deleteGasto('${g.id}')">🗑️</button>
-          ` : '<span class="text-muted" style="font-size: 0.75rem;">Solo Lectura</span>'}
+          ` : `<span class="badge ${isAprobado ? 'badge-success' : 'badge-warning'}">${isAprobado ? '✅ Pagado' : '⏳ Pendiente'}</span>`}
         </td>
       </tr>
     `;
