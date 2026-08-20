@@ -1,0 +1,1110 @@
+// Peña Los Intratables - Almodóvar del Campo App Logic (V6 - Cálculo Automático Unidades × Precio/Ud)
+
+const STORAGE_KEY = 'intratables_peña_db_v6';
+const DEFAULT_PIN = '1234';
+
+// Instancias globales de gráficos Chart.js
+let chartGastoCatInstance = null;
+let chartPresupuestoVsRealInstance = null;
+
+// Datos de inicio por defecto con Unidades, Formato, Precio por Unidad e Importe Total Calculado
+const DEFAULT_DATA = {
+  config: {
+    pin: DEFAULT_PIN,
+    cuotaSocio: 120,
+    totalCorralon: 800,
+    tarifaDia: 15,
+    tarifaFinde: 35,
+    tarifaCompleto: 70,
+    fechaFiestas: '2026-09-12T12:00:00'
+  },
+  socios: [
+    { id: 'soc_1', nombre: 'Daniel Lacero', cuota: 120, pagado: 120 },
+    { id: 'soc_2', nombre: 'Carlos "El Mula"', cuota: 120, pagado: 120 },
+    { id: 'soc_3', nombre: 'Álvaro "Pacheco"', cuota: 120, pagado: 60 },
+    { id: 'soc_4', nombre: 'David G.', cuota: 120, pagado: 120 },
+    { id: 'soc_5', nombre: 'Jesús M.', cuota: 120, pagado: 0 },
+    { id: 'soc_6', nombre: 'Manuel Fernández', cuota: 120, pagado: 120 },
+    { id: 'soc_7', nombre: 'Javier Ruiz', cuota: 120, pagado: 120 },
+    { id: 'soc_8', nombre: 'Alejandro "Titi"', cuota: 120, pagado: 60 },
+    { id: 'soc_9', nombre: 'Pablo Moreno', cuota: 120, pagado: 0 },
+    { id: 'soc_10', nombre: 'Gonzalo Santos', cuota: 120, pagado: 120 },
+    { id: 'soc_11', nombre: 'Adrián "Pepo"', cuota: 120, pagado: 120 },
+    { id: 'soc_12', nombre: 'Rubén "Chispas"', cuota: 120, pagado: 0 },
+    { id: 'soc_13', nombre: 'Jorge L.', cuota: 120, pagado: 120 },
+    { id: 'soc_14', nombre: 'Marcos R.', cuota: 120, pagado: 120 },
+    { id: 'soc_15', nombre: 'Víctor M.', cuota: 120, pagado: 60 },
+    { id: 'soc_16', nombre: 'Raúl C.', cuota: 120, pagado: 120 },
+    { id: 'soc_17', nombre: 'Alberto B.', cuota: 120, pagado: 0 },
+    { id: 'soc_18', nombre: 'Sergio K.', cuota: 120, pagado: 120 },
+    { id: 'soc_19', nombre: 'Borja T.', cuota: 120, pagado: 120 },
+    { id: 'soc_20', nombre: 'Jaime P.', cuota: 120, pagado: 120 },
+    { id: 'soc_21', nombre: 'Oscar L.', cuota: 120, pagado: 60 },
+    { id: 'soc_22', nombre: 'Mario V.', cuota: 120, pagado: 120 },
+    { id: 'soc_23', nombre: 'Diego H.', cuota: 120, pagado: 0 },
+    { id: 'soc_24', nombre: 'Iván S.', cuota: 120, pagado: 120 },
+    { id: 'soc_25', nombre: 'Fernando G.', cuota: 120, pagado: 120 },
+    { id: 'soc_26', nombre: 'Hugo N.', cuota: 120, pagado: 60 },
+    { id: 'soc_27', nombre: 'Guillermo F.', cuota: 120, pagado: 120 },
+    { id: 'soc_28', nombre: 'Lucas E.', cuota: 120, pagado: 120 },
+    { id: 'soc_29', nombre: 'Enrique M.', cuota: 120, pagado: 0 },
+    { id: 'soc_30', nombre: 'Emilio P.', cuota: 120, pagado: 120 }
+  ],
+  invitados: [
+    { id: 'inv_1', nombre: 'Andrés (Primo Carlos)', anfitrionId: 'soc_2', modalidad: 'finde1', detalleDia: '1er Fin de Semana', importe: 35, estado: 'pagado' },
+    { id: 'inv_2', nombre: 'Marta R.', anfitrionId: 'soc_1', modalidad: 'dia', detalleDia: 'Sábado 1er Finde', importe: 15, estado: 'pagado' },
+    { id: 'inv_3', nombre: 'Roberto K.', anfitrionId: 'soc_5', modalidad: 'completo', detalleDia: 'Fiestas 10 días', importe: 70, estado: 'pendiente' }
+  ],
+  compras: [
+    { id: 'cmp_1', nombre: 'Ron Ron Barceló', unidades: 40, formato: 'Botellas 1L', categoria: 'alcohol', precioUnitario: 13.50, precioTotal: 540, estado: 'comprado' },
+    { id: 'cmp_2', nombre: 'Whisky Red Label', unidades: 50, formato: 'Botellas 1L', categoria: 'alcohol', precioUnitario: 13.40, precioTotal: 670, estado: 'comprado' },
+    { id: 'cmp_3', nombre: 'Coca-Cola 2L (Packs 6)', unidades: 300, formato: 'Botellas 2L', categoria: 'refrescos', precioUnitario: 1.13, precioTotal: 340, estado: 'comprado' },
+    { id: 'cmp_4', nombre: 'Ginebra Puerto de Indias', unidades: 30, formato: 'Botellas 75CL', categoria: 'alcohol', precioUnitario: 14.00, precioTotal: 420, estado: 'pendiente' },
+    { id: 'cmp_5', nombre: 'Fanta Limón 2L', unidades: 200, formato: 'Botellas 2L', categoria: 'refrescos', precioUnitario: 1.10, precioTotal: 220, estado: 'pendiente' },
+    { id: 'cmp_6', nombre: 'Altavoz Potente Equipo Sonido Corralón', unidades: 1, formato: 'Unidad (300W)', categoria: 'equipamiento', precioUnitario: 300.00, precioTotal: 300, estado: 'comprado' },
+    { id: 'cmp_7', nombre: 'Alquiler Corralón (Reserva)', unidades: 1, formato: 'Reserva 10d', categoria: 'corralon', precioUnitario: 800.00, precioTotal: 800, estado: 'comprado' }
+  ],
+  gastos: [
+    { id: 'gst_1', concepto: 'Reposición urgente de hielos y 20 botellas 2L Coca-Cola', categoria: 'imprevisto_bebida', importe: 65, compradorId: 'soc_1', estado: 'aprobado' },
+    { id: 'gst_2', concepto: 'Paquete extra 500 vasos plástico y servilletas', categoria: 'imprevisto_menaje', importe: 25, compradorId: 'soc_4', estado: 'aprobado' },
+    { id: 'gst_3', concepto: 'Compra suplementaria de carne para migas miércoles', categoria: 'imprevisto_comida', importe: 75, compradorId: 'soc_2', estado: 'aprobado' }
+  ]
+};
+
+// State Manager
+let db = loadData();
+let isAdmin = false;
+
+function loadData() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    try {
+      const data = JSON.parse(saved);
+      if (!data.compras) data.compras = JSON.parse(JSON.stringify(DEFAULT_DATA.compras));
+      return data;
+    } catch (e) {
+      console.error('Error al cargar LocalStorage:', e);
+    }
+  }
+  return JSON.parse(JSON.stringify(DEFAULT_DATA));
+}
+
+function saveData() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+  renderAll();
+}
+
+// App Initialization
+document.addEventListener('DOMContentLoaded', () => {
+  setupNavigation();
+  setupSubTabs();
+  setupFiltersAndSearch();
+  setupFormsAndModals();
+  setupAdminControls();
+  startCountdownTimer();
+  renderAll();
+});
+
+// Navigation Tabs
+function setupNavigation() {
+  const tabs = document.querySelectorAll('.nav-tab');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+      
+      tab.classList.add('active');
+      const targetId = tab.dataset.tab;
+      document.getElementById(targetId).classList.add('active');
+
+      if (targetId === 'tab-dashboard') {
+        renderCharts();
+      }
+    });
+  });
+}
+
+// Sub-Tabs (Peñistas vs Invitados)
+function setupSubTabs() {
+  const btnSocios = document.getElementById('subtab-btn-socios');
+  const btnInvitados = document.getElementById('subtab-btn-invitados');
+  const paneSocios = document.getElementById('subpane-socios');
+  const paneInvitados = document.getElementById('subpane-invitados');
+
+  if (btnSocios && btnInvitados) {
+    btnSocios.addEventListener('click', () => {
+      btnSocios.classList.add('active');
+      btnInvitados.classList.remove('active');
+      paneSocios.classList.add('active');
+      paneInvitados.classList.remove('active');
+    });
+
+    btnInvitados.addEventListener('click', () => {
+      btnInvitados.classList.add('active');
+      btnSocios.classList.remove('active');
+      paneInvitados.classList.add('active');
+      paneSocios.classList.remove('active');
+    });
+  }
+}
+
+window.switchTab = function(tabId) {
+  const tabBtn = document.querySelector(`.nav-tab[data-tab="${tabId}"]`);
+  if (tabBtn) tabBtn.click();
+};
+
+// Admin & PIN Mode
+function setupAdminControls() {
+  const btnPinToggle = document.getElementById('btn-pin-toggle');
+  const btnSubmitPin = document.getElementById('btn-submit-pin');
+  const inputPinAuth = document.getElementById('input-pin-auth');
+
+  btnPinToggle.addEventListener('click', () => {
+    if (isAdmin) {
+      isAdmin = false;
+      updateAdminUI();
+      alert('🔒 Has salido del modo Administrador / Tesorero.');
+    } else {
+      switchTab('tab-ajustes');
+      inputPinAuth.focus();
+    }
+  });
+
+  btnSubmitPin.addEventListener('click', () => {
+    const pin = inputPinAuth.value.trim();
+    if (pin === db.config.pin) {
+      isAdmin = true;
+      inputPinAuth.value = '';
+      updateAdminUI();
+      alert('🔓 Modo Administrador / Tesorero desbloqueado.');
+      switchTab('tab-dashboard');
+    } else {
+      alert('❌ PIN Incorrecto. El PIN por defecto es 1234.');
+    }
+  });
+}
+
+function updateAdminUI() {
+  const pinStatusText = document.getElementById('pin-status-text');
+  const pinStatusIcon = document.getElementById('pin-status-icon');
+  
+  if (isAdmin) {
+    document.body.classList.remove('read-only');
+    pinStatusText.textContent = 'Modo Tesorero (Activo)';
+    pinStatusIcon.textContent = '🔓';
+  } else {
+    document.body.classList.add('read-only');
+    pinStatusText.textContent = 'Modo Lectura';
+    pinStatusIcon.textContent = '🔒';
+  }
+  renderAll();
+}
+
+// Countdown Timer
+function startCountdownTimer() {
+  const timerElem = document.getElementById('countdown-timer');
+  
+  function updateTimer() {
+    const targetDate = new Date(db.config.fechaFiestas || '2026-09-12T12:00:00').getTime();
+    const now = new Date().getTime();
+    const diff = targetDate - now;
+
+    if (diff <= 0) {
+      timerElem.textContent = '🎉 ¡ESTAMOS EN FIESTAS EN ALMODÓVAR! 🎉';
+      return;
+    }
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+    timerElem.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+  }
+
+  updateTimer();
+  setInterval(updateTimer, 1000);
+}
+
+// Render Core
+function renderAll() {
+  renderMetrics();
+  renderSocios();
+  renderInvitados();
+  renderCompras();
+  renderGastos();
+  renderConfig();
+  renderCharts();
+}
+
+// 1. Dashboard Interactivo
+function renderMetrics() {
+  // Recaudado Socios
+  const recaudadoSocios = db.socios.reduce((acc, s) => acc + (Number(s.pagado) || 0), 0);
+  
+  // Recaudado Invitados
+  const recaudadoInvitados = db.invitados
+    .filter(i => i.estado === 'pagado')
+    .reduce((acc, i) => acc + (Number(i.importe) || 0), 0);
+
+  const totalRecaudado = recaudadoSocios + recaudadoInvitados;
+
+  // Compras Comunes Compradas
+  const totalComprasIniciales = db.compras
+    .filter(c => c.estado === 'comprado' && c.categoria !== 'corralon')
+    .reduce((acc, c) => acc + (Number(c.precioTotal) || Number(c.precio) || 0), 0);
+
+  // Gasto Corralón
+  const gastoCorralon = db.compras
+    .filter(c => c.categoria === 'corralon' && c.estado === 'comprado')
+    .reduce((acc, c) => acc + (Number(c.precioTotal) || Number(c.precio) || 0), 0);
+  
+  const presupuestoCorralon = db.config.totalCorralon || 800;
+
+  // Gastos Extras Imprevistos
+  const totalGastosExtras = db.gastos
+    .filter(g => g.estado === 'aprobado')
+    .reduce((acc, g) => acc + (Number(g.importe) || 0), 0);
+
+  // Total Gastado Real
+  const totalGastado = gastoCorralon + totalComprasIniciales + totalGastosExtras;
+
+  // Pendiente de Cobro
+  const pendienteSocios = db.socios.reduce((acc, s) => {
+    const pend = (Number(s.cuota) || 0) - (Number(s.pagado) || 0);
+    return acc + (pend > 0 ? pend : 0);
+  }, 0);
+
+  const pendienteInvitados = db.invitados
+    .filter(i => i.estado === 'pendiente')
+    .reduce((acc, i) => acc + (Number(i.importe) || 0), 0);
+
+  const totalPendiente = pendienteSocios + pendienteInvitados;
+  const saldoCaja = totalRecaudado - totalGastado;
+
+  const sociosPendientesCount = db.socios.filter(s => (s.cuota - s.pagado) > 0).length;
+
+  // Populate Main Cards
+  document.getElementById('val-recaudado').textContent = `${totalRecaudado.toLocaleString()} €`;
+  document.getElementById('val-recaudado-socios').textContent = recaudadoSocios;
+  document.getElementById('val-recaudado-invitados').textContent = recaudadoInvitados;
+
+  document.getElementById('val-gastado').textContent = `${totalGastado.toLocaleString()} €`;
+
+  const elemSaldo = document.getElementById('val-saldo');
+  elemSaldo.textContent = `${saldoCaja.toLocaleString()} €`;
+  elemSaldo.className = `metric-value ${saldoCaja >= 0 ? 'text-success' : 'text-danger'}`;
+  document.getElementById('val-saldo-status').textContent = saldoCaja >= 0 ? '👍 Saldo positivo en caja' : '⚠️ Saldo negativo en caja';
+
+  document.getElementById('val-pendiente').textContent = `${totalPendiente.toLocaleString()} €`;
+  document.getElementById('val-socios-pendientes').textContent = sociosPendientesCount;
+
+  document.getElementById('count-socios').textContent = db.socios.length;
+  document.getElementById('count-invitados').textContent = db.invitados.length;
+
+  // Breakdown Cards
+  document.getElementById('dash-corralon-amount').textContent = `${gastoCorralon} €`;
+  document.getElementById('dash-corralon-budget').textContent = `${presupuestoCorralon} €`;
+
+  document.getElementById('dash-iniciales-amount').textContent = `${totalComprasIniciales} €`;
+  document.getElementById('dash-extras-amount').textContent = `${totalGastosExtras} €`;
+
+  renderSummaryLists();
+}
+
+// Render Charts via Chart.js
+function renderCharts() {
+  if (typeof Chart === 'undefined') return;
+
+  const canvasGastoCat = document.getElementById('chartGastoCategoria');
+  const canvasPresupuestoVsReal = document.getElementById('chartPresupuestoVsReal');
+
+  if (!canvasGastoCat || !canvasPresupuestoVsReal) return;
+
+  // Calculate Categories Data
+  let gastoCorralon = 0;
+  let gastoAlcohol = 0;
+  let gastoRefrescos = 0;
+  let gastoEquipamiento = 0;
+  let gastoOtrosCompras = 0;
+
+  db.compras.forEach(c => {
+    const val = c.estado === 'comprado' ? (Number(c.precioTotal) || Number(c.precio) || 0) : 0;
+    if (c.categoria === 'corralon') gastoCorralon += val;
+    else if (c.categoria === 'alcohol') gastoAlcohol += val;
+    else if (c.categoria === 'refrescos') gastoRefrescos += val;
+    else if (c.categoria === 'equipamiento') gastoEquipamiento += val;
+    else gastoOtrosCompras += val;
+  });
+
+  const gastoExtras = db.gastos
+    .filter(g => g.estado === 'aprobado')
+    .reduce((acc, g) => acc + Number(g.importe), 0);
+
+  // 1. Chart 1: Donut Chart por Categoría
+  if (chartGastoCatInstance) chartGastoCatInstance.destroy();
+
+  chartGastoCatInstance = new Chart(canvasGastoCat, {
+    type: 'doughnut',
+    data: {
+      labels: ['Corralón', 'Alcohol (1L/75CL)', 'Refrescos (2L) & Hielos', 'Equipamiento/Sonido', 'Gastos Extras Imprevistos'],
+      datasets: [{
+        data: [gastoCorralon, gastoAlcohol, gastoRefrescos, gastoEquipamiento, gastoExtras],
+        backgroundColor: [
+          '#0284c7', // Corralon Blue
+          '#dc2626', // Alcohol Red
+          '#16a34a', // Refrescos Green
+          '#d97706', // Equipos Amber
+          '#9333ea'  // Extras Purple
+        ],
+        borderWidth: 2,
+        borderColor: '#ffffff'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom' }
+      }
+    }
+  });
+
+  // 2. Chart 2: Bar Chart Comparativo de Gastos por Bloque
+  if (chartPresupuestoVsRealInstance) chartPresupuestoVsRealInstance.destroy();
+
+  chartPresupuestoVsRealInstance = new Chart(canvasPresupuestoVsReal, {
+    type: 'bar',
+    data: {
+      labels: ['Corralón', 'Alcohol (1L)', 'Refrescos (2L)', 'Equipamiento', 'Extras Imprevistos'],
+      datasets: [
+        {
+          label: 'Gasto Total (€)',
+          data: [gastoCorralon, gastoAlcohol, gastoRefrescos, gastoEquipamiento, gastoExtras],
+          backgroundColor: '#16a34a'
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom' }
+      },
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+}
+
+function renderSummaryLists() {
+  // Deudores
+  const deudores = db.socios
+    .filter(s => (s.cuota - s.pagado) > 0)
+    .slice(0, 5);
+
+  const listDeudores = document.getElementById('list-deudores-summary');
+  if (deudores.length === 0) {
+    listDeudores.innerHTML = '<li class="empty-msg">¡Todos los peñistas han pagado! 🎉</li>';
+  } else {
+    listDeudores.innerHTML = deudores.map(s => `
+      <li>
+        <span><strong>${escapeHTML(s.nombre)}</strong></span>
+        <span class="text-danger">Faltan ${s.cuota - s.pagado} €</span>
+      </li>
+    `).join('');
+  }
+
+  // Ultimos Gastos Extras
+  const ultimosGastos = [...db.gastos].reverse().slice(0, 5);
+  const listGastos = document.getElementById('list-gastos-summary');
+  if (ultimosGastos.length === 0) {
+    listGastos.innerHTML = '<li class="empty-msg">No hay gastos extras registrados aún.</li>';
+  } else {
+    listGastos.innerHTML = ultimosGastos.map(g => `
+      <li>
+        <span>${escapeHTML(g.concepto)}</span>
+        <strong class="text-danger">${g.importe} €</strong>
+      </li>
+    `).join('');
+  }
+}
+
+// 2. Compras Comunes (Bote General)
+let compraFilter = 'todos';
+let compraSearchQuery = '';
+
+function renderCompras() {
+  const tbody = document.getElementById('tbody-compras');
+  let list = db.compras.filter(c => {
+    const matchSearch = c.nombre.toLowerCase().includes(compraSearchQuery.toLowerCase()) ||
+                        (c.formato && c.formato.toLowerCase().includes(compraSearchQuery.toLowerCase()));
+    const isComprado = c.estado === 'comprado';
+    if (compraFilter === 'pendiente') return matchSearch && !isComprado;
+    if (compraFilter === 'comprado') return matchSearch && isComprado;
+    return matchSearch;
+  });
+
+  if (list.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="9" class="empty-msg">No hay compras registradas en el bote común.</td></tr>`;
+    return;
+  }
+
+  const catLabels = {
+    alcohol: '🍷 Alcohol (1L / 75CL)',
+    refrescos: '🥤 Refrescos 2L & Hielos',
+    equipamiento: '🔊 Sonido / Equipos',
+    corralon: '🏠 Corralón',
+    comida: '🥩 Comida',
+    otros: '📦 Otros'
+  };
+
+  tbody.innerHTML = list.map((c, index) => {
+    const isComprado = c.estado === 'comprado';
+    const unidades = c.unidades || 1;
+    const formato = c.formato || c.cantidad || 'Unidades';
+    const pUnit = c.precioUnitario ? Number(c.precioUnitario).toFixed(2) : '-';
+    const pTotal = Number(c.precioTotal || c.precio || 0).toFixed(2);
+
+    return `
+      <tr>
+        <td><strong>${index + 1}</strong></td>
+        <td><strong>${escapeHTML(c.nombre)}</strong></td>
+        <td><span class="badge badge-warning" style="font-size: 0.85rem;">${unidades}</span></td>
+        <td>${escapeHTML(formato)}</td>
+        <td>${catLabels[c.categoria] || c.categoria}</td>
+        <td>${pUnit !== '-' ? pUnit + ' €/ud' : '-'}</td>
+        <td><strong class="text-success" style="font-size: 0.95rem;">${pTotal} €</strong></td>
+        <td>
+          <span class="badge ${isComprado ? 'badge-success' : 'badge-warning'}">
+            ${isComprado ? '✅ Ya Comprado' : '⏳ Pendiente'}
+          </span>
+        </td>
+        <td class="text-right">
+          <button class="btn-secondary btn-sm" onclick="toggleEstadoCompra('${c.id}')">
+            ${isComprado ? 'Desmarcar' : '✅ Marcar Comprado'}
+          </button>
+          <button class="btn-secondary btn-sm admin-only" onclick="openModalCompra('${c.id}')">✏️</button>
+          <button class="btn-danger btn-sm admin-only" onclick="deleteCompra('${c.id}')">🗑️</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// 3. Render Socios
+let socioFilter = 'todos';
+let socioSearchQuery = '';
+
+function renderSocios() {
+  const tbody = document.getElementById('tbody-socios');
+  let list = db.socios.filter(s => {
+    const matchSearch = s.nombre.toLowerCase().includes(socioSearchQuery.toLowerCase());
+    const pendiente = (s.cuota - s.pagado) > 0;
+    if (socioFilter === 'pendiente') return matchSearch && pendiente;
+    if (socioFilter === 'pagado') return matchSearch && !pendiente;
+    return matchSearch;
+  });
+
+  if (list.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" class="empty-msg">No se encontraron peñistas.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = list.map((s, index) => {
+    const pend = s.cuota - s.pagado;
+    const isPagado = pend <= 0;
+    const badgeClass = isPagado ? 'badge-success' : (s.pagado > 0 ? 'badge-warning' : 'badge-danger');
+    const badgeText = isPagado ? 'Pagado Total' : (s.pagado > 0 ? 'Parcial' : 'Falta por Pagar');
+
+    return `
+      <tr>
+        <td><strong>${index + 1}</strong></td>
+        <td><strong>${escapeHTML(s.nombre)}</strong></td>
+        <td>${s.cuota} €</td>
+        <td class="text-success">${s.pagado} €</td>
+        <td class="${pend > 0 ? 'text-danger' : 'text-muted'}">${pend > 0 ? pend + ' €' : '0 €'}</td>
+        <td><span class="badge ${badgeClass}">${badgeText}</span></td>
+        <td class="text-right">
+          ${!isPagado ? `<button class="btn-primary btn-sm admin-only" onclick="openModalPagoSocio('${s.id}')">💵 Añadir Pago</button>` : ''}
+          <button class="btn-secondary btn-sm admin-only" onclick="openModalSocio('${s.id}')">✏️</button>
+          <button class="btn-danger btn-sm admin-only" onclick="deleteSocio('${s.id}')">🗑️</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// 4. Render Invitados
+let invitadoSearchQuery = '';
+
+function renderInvitados() {
+  const tbody = document.getElementById('tbody-invitados');
+  let list = db.invitados.filter(i => {
+    const anf = db.socios.find(s => s.id === i.anfitrionId);
+    const anfNombre = anf ? anf.nombre : '';
+    return i.nombre.toLowerCase().includes(invitadoSearchQuery.toLowerCase()) || 
+           anfNombre.toLowerCase().includes(invitadoSearchQuery.toLowerCase());
+  });
+
+  if (list.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8" class="empty-msg">No hay invitados registrados.</td></tr>`;
+    return;
+  }
+
+  const modalidadLabels = {
+    dia: '🎫 Día Suelto',
+    finde1: '🎟️ 1er Finde',
+    finde2: '🎟️ 2º Finde',
+    completo: '🌟 Fiestas Completas (10d)'
+  };
+
+  tbody.innerHTML = list.map((i, index) => {
+    const anfitrion = db.socios.find(s => s.id === i.anfitrionId);
+    const isPagado = i.estado === 'pagado';
+
+    return `
+      <tr>
+        <td><strong>${index + 1}</strong></td>
+        <td><strong>${escapeHTML(i.nombre)}</strong></td>
+        <td>${anfitrion ? escapeHTML(anfitrion.nombre) : 'Desconocido'}</td>
+        <td>${modalidadLabels[i.modalidad] || i.modalidad}</td>
+        <td>${escapeHTML(i.detalleDia || '-')}</td>
+        <td><strong>${i.importe} €</strong></td>
+        <td>
+          <span class="badge ${isPagado ? 'badge-success' : 'badge-warning'}">
+            ${isPagado ? 'Pagado' : 'Falta por Pagar'}
+          </span>
+        </td>
+        <td class="text-right">
+          ${!isPagado ? `<button class="btn-primary btn-sm admin-only" onclick="togglePagoInvitado('${i.id}')">Mark Pagado</button>` : ''}
+          <button class="btn-secondary btn-sm admin-only" onclick="openModalInvitado('${i.id}')">✏️</button>
+          <button class="btn-danger btn-sm admin-only" onclick="deleteInvitado('${i.id}')">🗑️</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// 5. Render Gastos Extras / Imprevistos
+let gastoSearchQuery = '';
+
+function renderGastos() {
+  const tbody = document.getElementById('tbody-gastos');
+  let list = db.gastos.filter(g => {
+    return g.concepto.toLowerCase().includes(gastoSearchQuery.toLowerCase()) ||
+           g.categoria.toLowerCase().includes(gastoSearchQuery.toLowerCase());
+  });
+
+  if (list.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" class="empty-msg">No hay gastos extras registrados a mitad de fiestas.</td></tr>`;
+    return;
+  }
+
+  const catLabels = {
+    imprevisto_bebida: '🍷 Reposición Bebida / Hielos',
+    imprevisto_comida: '🥩 Comida Extra',
+    imprevisto_menaje: '🥛 Vasos y Limpieza',
+    imprevisto_equipo: '🔧 Sonido / Cableado',
+    otros: '📦 Otros Imprevistos'
+  };
+
+  tbody.innerHTML = list.map((g, index) => {
+    let pagadoPorText = '💰 Bote Peña';
+    if (g.compradorId && g.compradorId !== 'peña') {
+      const socio = db.socios.find(s => s.id === g.compradorId);
+      pagadoPorText = socio ? `👤 ${socio.nombre}` : 'Socio Desconocido';
+    }
+
+    const isAprobado = g.estado === 'aprobado';
+
+    return `
+      <tr>
+        <td><strong>${index + 1}</strong></td>
+        <td><strong>${escapeHTML(g.concepto)}</strong></td>
+        <td>${catLabels[g.categoria] || g.categoria}</td>
+        <td><strong class="text-danger">${g.importe} €</strong></td>
+        <td>${escapeHTML(pagadoPorText)}</td>
+        <td>
+          <span class="badge ${isAprobado ? 'badge-success' : 'badge-warning'}">
+            ${isAprobado ? 'Aprobado' : 'Pendiente Revisión'}
+          </span>
+        </td>
+        <td class="text-right">
+          ${!isAprobado ? `<button class="btn-primary btn-sm admin-only" onclick="aprobarGasto('${g.id}')">Aprobar</button>` : ''}
+          <button class="btn-secondary btn-sm admin-only" onclick="openModalGasto('${g.id}')">✏️</button>
+          <button class="btn-danger btn-sm admin-only" onclick="deleteGasto('${g.id}')">🗑️</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// 6. Render Config
+function renderConfig() {
+  document.getElementById('cfg-cuota-socio').value = db.config.cuotaSocio || 120;
+  document.getElementById('cfg-total-corralon').value = db.config.totalCorralon || 800;
+  document.getElementById('cfg-tarifa-dia').value = db.config.tarifaDia || 15;
+  document.getElementById('cfg-tarifa-finde').value = db.config.tarifaFinde || 35;
+  document.getElementById('cfg-tarifa-completo').value = db.config.tarifaCompleto || 70;
+}
+
+// Setup Filters & Search
+function setupFiltersAndSearch() {
+  // Compras Search & Filter
+  document.getElementById('search-compras').addEventListener('input', e => {
+    compraSearchQuery = e.target.value;
+    renderCompras();
+  });
+
+  document.querySelectorAll('.filter-btn[data-filter-compra]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn[data-filter-compra]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      compraFilter = btn.dataset.filterCompra;
+      renderCompras();
+    });
+  });
+
+  // Socios Search & Filter
+  document.getElementById('search-socios').addEventListener('input', e => {
+    socioSearchQuery = e.target.value;
+    renderSocios();
+  });
+
+  document.querySelectorAll('.filter-btn[data-filter-socio]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn[data-filter-socio]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      socioFilter = btn.dataset.filterSocio;
+      renderSocios();
+    });
+  });
+
+  // Invitados Search
+  document.getElementById('search-invitados').addEventListener('input', e => {
+    invitadoSearchQuery = e.target.value;
+    renderInvitados();
+  });
+
+  // Gastos Search
+  document.getElementById('search-gastos').addEventListener('input', e => {
+    gastoSearchQuery = e.target.value;
+    renderGastos();
+  });
+}
+
+// Forms & Modals Setup
+function setupFormsAndModals() {
+  // Close Modals
+  document.querySelectorAll('.modal-close, .modal-cancel').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.modal-backdrop').forEach(m => m.classList.remove('active'));
+    });
+  });
+
+  // Live Auto-Calculation in Form Compra
+  const inputUnidades = document.getElementById('compra-unidades');
+  const inputPrecioUnit = document.getElementById('compra-precio-unitario');
+  const inputTotalCalc = document.getElementById('compra-precio-total');
+
+  function updateLiveTotal() {
+    const uds = Number(inputUnidades.value) || 0;
+    const pUnit = Number(inputPrecioUnit.value) || 0;
+    const total = uds * pUnit;
+    inputTotalCalc.value = total.toFixed(2);
+  }
+
+  if (inputUnidades && inputPrecioUnit) {
+    inputUnidades.addEventListener('input', updateLiveTotal);
+    inputPrecioUnit.addEventListener('input', updateLiveTotal);
+  }
+
+  // Open Add Compra Común
+  document.getElementById('btn-add-compra').addEventListener('click', () => openModalCompra());
+
+  // Save Compra Común Form
+  document.getElementById('form-compra').addEventListener('submit', e => {
+    e.preventDefault();
+    const id = document.getElementById('compra-id').value;
+    const nombre = document.getElementById('compra-nombre').value.trim();
+    const unidades = Number(document.getElementById('compra-unidades').value) || 1;
+    const formato = document.getElementById('compra-formato').value.trim();
+    const categoria = document.getElementById('compra-categoria').value;
+    const precioUnitario = Number(document.getElementById('compra-precio-unitario').value) || 0;
+    const precioTotal = unidades * precioUnitario;
+    const estado = document.getElementById('compra-estado').value;
+
+    if (id) {
+      const idx = db.compras.findIndex(c => c.id === id);
+      if (idx !== -1) db.compras[idx] = { id, nombre, unidades, formato, categoria, precioUnitario, precioTotal, estado };
+    } else {
+      const newId = 'cmp_' + Date.now();
+      db.compras.push({ id: newId, nombre, unidades, formato, categoria, precioUnitario, precioTotal, estado });
+    }
+
+    saveData();
+    closeModals();
+  });
+
+  // Open Add Socio
+  document.getElementById('btn-add-socio').addEventListener('click', () => openModalSocio());
+
+  // Save Socio Form
+  document.getElementById('form-socio').addEventListener('submit', e => {
+    e.preventDefault();
+    const id = document.getElementById('socio-id').value;
+    const nombre = document.getElementById('socio-nombre').value.trim();
+    const cuota = Number(document.getElementById('socio-cuota').value);
+    const pagado = Number(document.getElementById('socio-pagado').value);
+
+    if (id) {
+      const idx = db.socios.findIndex(s => s.id === id);
+      if (idx !== -1) db.socios[idx] = { id, nombre, cuota, pagado };
+    } else {
+      const newId = 'soc_' + Date.now();
+      db.socios.push({ id: newId, nombre, cuota, pagado });
+    }
+
+    saveData();
+    closeModals();
+  });
+
+  // Save Pago Socio
+  document.getElementById('form-pago-socio').addEventListener('submit', e => {
+    e.preventDefault();
+    const id = document.getElementById('pago-socio-id').value;
+    const cantidad = Number(document.getElementById('pago-socio-cantidad').value);
+
+    const socio = db.socios.find(s => s.id === id);
+    if (socio) {
+      socio.pagado = (Number(socio.pagado) || 0) + cantidad;
+      saveData();
+    }
+    closeModals();
+  });
+
+  // Open Add Invitado
+  document.getElementById('btn-add-invitado').addEventListener('click', () => openModalInvitado());
+
+  // Modalidad invitado change price auto
+  document.getElementById('invitado-modalidad').addEventListener('change', e => {
+    const mod = e.target.value;
+    const inputImp = document.getElementById('invitado-importe');
+    const groupFecha = document.getElementById('group-invitado-fecha');
+
+    if (mod === 'dia') {
+      inputImp.value = db.config.tarifaDia || 15;
+      groupFecha.style.display = 'flex';
+    } else if (mod === 'finde1' || mod === 'finde2') {
+      inputImp.value = db.config.tarifaFinde || 35;
+      groupFecha.style.display = 'none';
+    } else if (mod === 'completo') {
+      inputImp.value = db.config.tarifaCompleto || 70;
+      groupFecha.style.display = 'none';
+    }
+  });
+
+  // Save Invitado Form
+  document.getElementById('form-invitado').addEventListener('submit', e => {
+    e.preventDefault();
+    const id = document.getElementById('invitado-id').value;
+    const nombre = document.getElementById('invitado-nombre').value.trim();
+    const anfitrionId = document.getElementById('invitado-anfitrion').value;
+    const modalidad = document.getElementById('invitado-modalidad').value;
+    const detalleDia = document.getElementById('invitado-detalle-dia').value.trim();
+    const importe = Number(document.getElementById('invitado-importe').value);
+    const estado = document.getElementById('invitado-estado').value;
+
+    if (id) {
+      const idx = db.invitados.findIndex(i => i.id === id);
+      if (idx !== -1) db.invitados[idx] = { id, nombre, anfitrionId, modalidad, detalleDia, importe, estado };
+    } else {
+      const newId = 'inv_' + Date.now();
+      db.invitados.push({ id: newId, nombre, anfitrionId, modalidad, detalleDia, importe, estado });
+    }
+
+    saveData();
+    closeModals();
+  });
+
+  // Open Add Gasto Extra
+  document.getElementById('btn-add-gasto').addEventListener('click', () => openModalGasto());
+
+  // Save Gasto Extra Form
+  document.getElementById('form-gasto').addEventListener('submit', e => {
+    e.preventDefault();
+    const id = document.getElementById('gasto-id').value;
+    const concepto = document.getElementById('gasto-concepto').value.trim();
+    const categoria = document.getElementById('gasto-categoria').value;
+    const importe = Number(document.getElementById('gasto-importe').value);
+    const compradorId = document.getElementById('gasto-comprador').value;
+    const estado = document.getElementById('gasto-estado').value;
+
+    if (id) {
+      const idx = db.gastos.findIndex(g => g.id === id);
+      if (idx !== -1) db.gastos[idx] = { id, concepto, categoria, importe, compradorId, estado };
+    } else {
+      const newId = 'gst_' + Date.now();
+      db.gastos.push({ id: newId, concepto, categoria, importe, compradorId, estado });
+    }
+
+    saveData();
+    closeModals();
+  });
+
+  // Config Tarifas Form
+  document.getElementById('form-config-tarifas').addEventListener('submit', e => {
+    e.preventDefault();
+    db.config.cuotaSocio = Number(document.getElementById('cfg-cuota-socio').value);
+    db.config.totalCorralon = Number(document.getElementById('cfg-total-corralon').value);
+    db.config.tarifaDia = Number(document.getElementById('cfg-tarifa-dia').value);
+    db.config.tarifaFinde = Number(document.getElementById('cfg-tarifa-finde').value);
+    db.config.tarifaCompleto = Number(document.getElementById('cfg-tarifa-completo').value);
+
+    saveData();
+    alert('✅ Tarifas actualizadas correctamente.');
+  });
+
+  // Export JSON
+  document.getElementById('btn-export-json').addEventListener('click', () => {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2));
+    const downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute("href", dataStr);
+    downloadAnchor.setAttribute("download", `intratables_excel_${new Date().toISOString().slice(0,10)}.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+  });
+
+  // Import JSON
+  document.getElementById('input-import-json').addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const imported = JSON.parse(event.target.result);
+        if (imported.socios && imported.gastos) {
+          db = imported;
+          if (!db.compras) db.compras = JSON.parse(JSON.stringify(DEFAULT_DATA.compras));
+          saveData();
+          alert('🎉 Hoja de cuentas importada con éxito.');
+        } else {
+          alert('❌ El archivo JSON no tiene el formato correcto.');
+        }
+      } catch (err) {
+        alert('❌ Error al leer el archivo JSON.');
+      }
+    };
+    reader.readAsText(file);
+  });
+
+  // Reset Data
+  document.getElementById('btn-reset-data').addEventListener('click', () => {
+    if (confirm('⚠️ ¿Seguro que quieres resetear los datos a los valores de prueba por defecto?')) {
+      db = JSON.parse(JSON.stringify(DEFAULT_DATA));
+      saveData();
+    }
+  });
+}
+
+function closeModals() {
+  document.querySelectorAll('.modal-backdrop').forEach(m => m.classList.remove('active'));
+}
+
+// Modal Handlers & Actions
+
+// 1. Compra Común (Bote General)
+window.openModalCompra = function(id = null) {
+  const modal = document.getElementById('modal-compra');
+  const title = document.getElementById('modal-compra-title');
+  document.getElementById('form-compra').reset();
+
+  if (id) {
+    const c = db.compras.find(item => item.id === id);
+    if (c) {
+      title.textContent = 'Editar Compra Común';
+      document.getElementById('compra-id').value = c.id;
+      document.getElementById('compra-nombre').value = c.nombre;
+      document.getElementById('compra-unidades').value = c.unidades || 1;
+      document.getElementById('compra-formato').value = c.formato || c.cantidad || 'Botellas 1L';
+      document.getElementById('compra-categoria').value = c.categoria;
+      document.getElementById('compra-precio-unitario').value = c.precioUnitario || 0;
+      document.getElementById('compra-precio-total').value = (c.precioTotal || c.precio || 0).toFixed(2);
+      document.getElementById('compra-estado').value = c.estado;
+    }
+  } else {
+    title.textContent = 'Añadir Compra Común';
+    document.getElementById('compra-id').value = '';
+    document.getElementById('compra-unidades').value = 1;
+    document.getElementById('compra-formato').value = 'Botellas 1L';
+    document.getElementById('compra-estado').value = 'comprado';
+  }
+
+  modal.classList.add('active');
+};
+
+window.toggleEstadoCompra = function(id) {
+  const c = db.compras.find(item => item.id === id);
+  if (c) {
+    c.estado = c.estado === 'comprado' ? 'pendiente' : 'comprado';
+    saveData();
+  }
+};
+
+window.deleteCompra = function(id) {
+  if (confirm('¿Eliminar esta compra de la lista común?')) {
+    db.compras = db.compras.filter(c => c.id !== id);
+    saveData();
+  }
+};
+
+// 2. Socio Modal & Actions
+window.openModalSocio = function(id = null) {
+  const modal = document.getElementById('modal-socio');
+  const title = document.getElementById('modal-socio-title');
+  document.getElementById('form-socio').reset();
+
+  if (id) {
+    const s = db.socios.find(item => item.id === id);
+    if (s) {
+      title.textContent = 'Editar Peñista';
+      document.getElementById('socio-id').value = s.id;
+      document.getElementById('socio-nombre').value = s.nombre;
+      document.getElementById('socio-cuota').value = s.cuota;
+      document.getElementById('socio-pagado').value = s.pagado;
+    }
+  } else {
+    title.textContent = 'Añadir Peñista';
+    document.getElementById('socio-id').value = '';
+    document.getElementById('socio-cuota').value = db.config.cuotaSocio || 120;
+    document.getElementById('socio-pagado').value = 0;
+  }
+
+  modal.classList.add('active');
+};
+
+window.openModalPagoSocio = function(id) {
+  const s = db.socios.find(item => item.id === id);
+  if (!s) return;
+
+  document.getElementById('form-pago-socio').reset();
+  document.getElementById('pago-socio-id').value = s.id;
+  document.getElementById('pago-socio-nombre').textContent = s.nombre;
+  
+  const pend = s.cuota - s.pagado;
+  document.getElementById('pago-socio-pendiente').textContent = `${pend} €`;
+  document.getElementById('pago-socio-cantidad').value = pend > 0 ? pend : '';
+
+  document.getElementById('modal-pago-socio').classList.add('active');
+};
+
+window.deleteSocio = function(id) {
+  if (confirm('¿Eliminar este peñista de la lista?')) {
+    db.socios = db.socios.filter(s => s.id !== id);
+    saveData();
+  }
+};
+
+// 3. Invitado Modal & Actions
+window.openModalInvitado = function(id = null) {
+  const modal = document.getElementById('modal-invitado');
+  const title = document.getElementById('modal-invitado-title');
+  const selectAnfitrion = document.getElementById('invitado-anfitrion');
+  document.getElementById('form-invitado').reset();
+
+  // Populate Anfitriones
+  selectAnfitrion.innerHTML = '<option value="">Selecciona peñista anfitrión...</option>' + 
+    db.socios.map(s => `<option value="${s.id}">${escapeHTML(s.nombre)}</option>`).join('');
+
+  if (id) {
+    const inv = db.invitados.find(item => item.id === id);
+    if (inv) {
+      title.textContent = 'Editar Invitado';
+      document.getElementById('invitado-id').value = inv.id;
+      document.getElementById('invitado-nombre').value = inv.nombre;
+      selectAnfitrion.value = inv.anfitrionId;
+      document.getElementById('invitado-modalidad').value = inv.modalidad;
+      document.getElementById('invitado-detalle-dia').value = inv.detalleDia || '';
+      document.getElementById('invitado-importe').value = inv.importe;
+      document.getElementById('invitado-estado').value = inv.estado;
+    }
+  } else {
+    title.textContent = 'Registrar Invitado';
+    document.getElementById('invitado-id').value = '';
+    document.getElementById('invitado-importe').value = db.config.tarifaDia || 15;
+  }
+
+  modal.classList.add('active');
+};
+
+window.togglePagoInvitado = function(id) {
+  const inv = db.invitados.find(i => i.id === id);
+  if (inv) {
+    inv.estado = 'pagado';
+    saveData();
+  }
+};
+
+window.deleteInvitado = function(id) {
+  if (confirm('¿Eliminar este invitado?')) {
+    db.invitados = db.invitados.filter(i => i.id !== id);
+    saveData();
+  }
+};
+
+// 4. Gasto Extra / Imprevisto Modal & Actions
+window.openModalGasto = function(id = null) {
+  const modal = document.getElementById('modal-gasto');
+  const title = document.getElementById('modal-gasto-title');
+  const selectComprador = document.getElementById('gasto-comprador');
+  document.getElementById('form-gasto').reset();
+
+  // Populate Compradores
+  selectComprador.innerHTML = '<option value="peña">💰 Bote General de la Peña</option>' + 
+    db.socios.map(s => `<option value="${s.id}">👤 ${escapeHTML(s.nombre)}</option>`).join('');
+
+  if (id) {
+    const g = db.gastos.find(item => item.id === id);
+    if (g) {
+      title.textContent = 'Editar Gasto Extra';
+      document.getElementById('gasto-id').value = g.id;
+      document.getElementById('gasto-concepto').value = g.concepto;
+      document.getElementById('gasto-categoria').value = g.categoria;
+      document.getElementById('gasto-importe').value = g.importe;
+      selectComprador.value = g.compradorId || 'peña';
+      document.getElementById('gasto-estado').value = g.estado;
+    }
+  } else {
+    title.textContent = 'Registrar Gasto Extra / Imprevisto';
+    document.getElementById('gasto-id').value = '';
+  }
+
+  modal.classList.add('active');
+};
+
+window.aprobarGasto = function(id) {
+  const g = db.gastos.find(item => item.id === id);
+  if (g) {
+    g.estado = 'aprobado';
+    saveData();
+  }
+};
+
+window.deleteGasto = function(id) {
+  if (confirm('¿Eliminar este gasto extra?')) {
+    db.gastos = db.gastos.filter(g => g.id !== id);
+    saveData();
+  }
+};
+
+// Utils
+function escapeHTML(str) {
+  if (!str) return '';
+  return str.replace(/[&<>'"]/g, 
+    tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+  );
+}
