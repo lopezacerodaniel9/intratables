@@ -586,6 +586,12 @@ function renderSummaryLists() {
 let compraFilter = 'todos';
 let compraSearchQuery = '';
 
+function extractQtyNumber(cantidadStr) {
+  if (!cantidadStr) return '1';
+  const match = cantidadStr.match(/(\d+)/);
+  return match ? match[1] : cantidadStr;
+}
+
 function renderCompras() {
   const tbody = document.getElementById('tbody-compras');
   let list = db.compras.filter(c => {
@@ -614,37 +620,65 @@ function renderCompras() {
   tbody.innerHTML = list.map((c, index) => {
     const isComprado = c.estado === 'comprado';
     const cantidadText = c.cantidad || '-';
+    const qtyNum = extractQtyNumber(cantidadText);
     const pTotal = Number(c.precio || 0).toFixed(2);
     const pUnit = c.precioUnitario ? Number(c.precioUnitario).toFixed(2) + ' €/ud' : '-';
 
     return `
       <tr>
         <td class="desktop-only"><strong>${index + 1}</strong></td>
-        <td>
-          <strong class="item-title">${escapeHTML(c.nombre)}</strong>
+        
+        <!-- VISTA MÓVIL: Tarjeta Blanca Limpia con Swipe Deslizable a la Izquierda -->
+        <td class="mobile-only-cell">
+          <div class="compra-swipe-row">
+            <div class="compra-swipe-body">
+              <div class="compra-main-info">
+                <div style="display:flex; align-items:center; gap:6px;">
+                  <strong class="compra-name-title">${escapeHTML(c.nombre)}</strong>
+                  <span class="compra-qty-circle">${qtyNum} ud</span>
+                </div>
+                <div class="compra-sub-info">
+                  <span class="badge ${isComprado ? 'badge-success' : 'badge-warning'}" style="font-size: 0.72rem; padding: 2px 6px;">
+                    ${isComprado ? '✅ Comprado' : '⏳ Pendiente'}
+                  </span>
+                  <span style="font-size:0.75rem; color:#64748b;">👈 Desliza para acciones</span>
+                </div>
+              </div>
+
+              <div class="compra-price-info">
+                <strong class="compra-total-val">${pTotal} €</strong>
+                ${c.precioUnitario ? `<span class="compra-unit-val">${pUnit}</span>` : ''}
+              </div>
+            </div>
+
+            <div class="compra-swipe-actions">
+              <button class="swipe-action-btn ${isComprado ? 'btn-secondary' : 'btn-primary'}" onclick="toggleEstadoCompra('${c.id}')" title="${isComprado ? 'Comprado' : 'Comprar'}">
+                ${isComprado ? '✅' : '⏳'}
+              </button>
+              <button class="swipe-action-btn btn-secondary admin-only" onclick="openModalCompra('${c.id}')" title="Editar">✏️</button>
+              <button class="swipe-action-btn btn-danger admin-only" onclick="deleteCompra('${c.id}')" title="Eliminar">🗑️</button>
+            </div>
+          </div>
         </td>
-        <td>
-          <span class="badge badge-warning" style="font-size: 0.78rem;">📦 ${escapeHTML(cantidadText)}</span>
-        </td>
-        <td>
-          <span style="font-size: 0.82rem; font-weight: 700; color: #475569;">${pUnit}</span>
-        </td>
-        <td>
-          <strong class="text-success" style="font-size: 0.95rem;">${pTotal} €</strong>
-        </td>
+
+        <!-- CELDAS DE ORDENADOR (DESKTOP) TRADICIONALES -->
+        <td class="desktop-only"><strong class="item-title">${escapeHTML(c.nombre)}</strong></td>
+        <td class="desktop-only"><span class="badge badge-warning" style="font-size: 0.85rem;">📦 ${qtyNum} ud</span></td>
+        <td class="desktop-only"><span style="font-size: 0.88rem; font-weight: 600; color: #475569;">${pUnit}</span></td>
+        <td class="desktop-only"><strong class="text-success" style="font-size: 0.95rem;">${pTotal} €</strong></td>
         <td class="desktop-only">
           <span class="badge ${isComprado ? 'badge-success' : 'badge-warning'}">
             ${isComprado ? '✅ Comprado' : '⏳ Pendiente'}
           </span>
         </td>
-        <td class="text-right action-cell">
+        <td class="text-right desktop-only">
           ${currentUser ? `
             <button class="${isComprado ? 'btn-secondary' : 'btn-primary'} btn-sm" onclick="toggleEstadoCompra('${c.id}')" title="${isComprado ? 'Comprado' : 'Comprar'}">
-              ${isComprado ? '✅' : '⏳'}
+              ${isComprado ? '✅ Comprado' : '⏳ Comprar'}
             </button>
             <button class="btn-secondary btn-sm admin-only" onclick="openModalCompra('${c.id}')" title="Editar">✏️</button>
             <button class="btn-danger btn-sm admin-only" onclick="deleteCompra('${c.id}')" title="Eliminar">🗑️</button>
-          ` : `<span class="badge ${isComprado ? 'badge-success' : 'badge-warning'}">${isComprado ? '✅' : '⏳'}</span>`}
+          ` : `<span class="badge ${isComprado ? 'badge-success' : 'badge-warning'}">${isComprado ? '✅ Comprado' : '⏳ Pendiente'}</span>`}
         </td>
       </tr>
     `;
@@ -677,14 +711,42 @@ function renderSocios() {
     return `
       <tr>
         <td class="desktop-only"><strong>${index + 1}</strong></td>
-        <td>
-          <div class="item-title"><strong>${escapeHTML(s.nombre)}</strong></div>
-          <div class="item-sub text-muted">Cuota: <strong class="text-main">${s.cuota} €</strong> • <span class="${isPagado ? 'text-success' : 'text-danger'}" style="font-weight:700;">${isPagado ? 'Pagado' : 'Falta pagar ' + pend + '€'}</span></div>
+        
+        <!-- VISTA MÓVIL: Tarjeta Blanca Limpia con Swipe Deslizable a la Izquierda -->
+        <td class="mobile-only-cell">
+          <div class="ios-swipe-row">
+            <div class="ios-swipe-body">
+              <div class="ios-swipe-main">
+                <strong class="ios-swipe-title">${escapeHTML(s.nombre)}</strong>
+                <div class="ios-swipe-sub">
+                  <span class="badge ${isPagado ? 'badge-success' : 'badge-danger'}" style="font-size: 0.72rem; padding: 2px 6px;">
+                    ${isPagado ? '✅ Pagado' : '❌ Falta ' + pend + '€'}
+                  </span>
+                  <span style="font-size:0.75rem; color:#64748b;">👈 Desliza para acciones</span>
+                </div>
+              </div>
+
+              <div class="ios-swipe-price">
+                <strong class="${isPagado ? 'text-success' : 'text-danger'}" style="font-size: 1.05rem;">${s.pagado} / ${s.cuota} €</strong>
+              </div>
+            </div>
+
+            <div class="ios-swipe-actions">
+              <button class="swipe-action-btn ${isPagado ? 'btn-secondary' : 'btn-primary'} admin-only" onclick="${isPagado ? `quickDesmarcarPagoSocio('${s.id}')` : `quickMarcarPagadoSocio('${s.id}')`}" title="${isPagado ? 'Pagado' : 'Pagar'}">
+                ${isPagado ? '✅' : '❌'}
+              </button>
+              <button class="swipe-action-btn btn-secondary admin-only" onclick="openModalSocio('${s.id}')" title="Editar">✏️</button>
+              <button class="swipe-action-btn btn-danger admin-only" onclick="deleteSocio('${s.id}')" title="Eliminar">🗑️</button>
+            </div>
+          </div>
         </td>
+
+        <!-- CELDAS DESKTOP TRADICIONALES -->
+        <td class="desktop-only"><strong>${escapeHTML(s.nombre)}</strong></td>
         <td class="desktop-only">${s.cuota} €</td>
         <td class="desktop-only text-success">${s.pagado} €</td>
         <td class="desktop-only"><span class="badge ${isPagado ? 'badge-success' : 'badge-danger'}">${isPagado ? '✅ Pagado' : '❌ Falta por Pagar'}</span></td>
-        <td class="text-right">
+        <td class="text-right desktop-only">
           ${currentUser ? `
             <button class="${isPagado ? 'btn-secondary' : 'btn-primary'} btn-sm admin-only" onclick="${isPagado ? `quickDesmarcarPagoSocio('${s.id}')` : `quickMarcarPagadoSocio('${s.id}')`}">
               ${isPagado ? '✅ Pagado' : '❌ Pagar'}
@@ -729,27 +791,56 @@ function renderInvitados() {
     return `
       <tr>
         <td class="desktop-only"><strong>${index + 1}</strong></td>
-        <td>
-          <div class="item-title"><strong>${escapeHTML(i.nombre)}</strong></div>
-          <div class="item-sub text-muted">Anfitrión: ${anfitrion ? escapeHTML(anfitrion.nombre) : '-'} • <strong>${i.importe} €</strong></div>
+        
+        <!-- VISTA MÓVIL: Tarjeta Blanca Limpia con Swipe Deslizable a la Izquierda -->
+        <td class="mobile-only-cell">
+          <div class="ios-swipe-row">
+            <div class="ios-swipe-body">
+              <div class="ios-swipe-main">
+                <strong class="ios-swipe-title">${escapeHTML(i.nombre)}</strong>
+                <div class="ios-swipe-sub">
+                  <span class="badge ${isPagado ? 'badge-success' : 'badge-danger'}" style="font-size: 0.72rem; padding: 2px 6px;">
+                    ${isPagado ? '✅ Pagado' : '❌ Falta por Pagar'}
+                  </span>
+                  <span style="font-size:0.75rem; color:#64748b;">• Anfitrión: ${anfitrion ? escapeHTML(anfitrion.nombre) : '-'}</span>
+                </div>
+              </div>
+
+              <div class="ios-swipe-price">
+                <strong class="text-success" style="font-size: 1.05rem;">${i.importe} €</strong>
+                <span style="font-size: 0.72rem; color: #64748b;">${modalidadLabels[i.modalidad] || i.modalidad}</span>
+              </div>
+            </div>
+
+            <div class="ios-swipe-actions">
+              <button class="swipe-action-btn ${isPagado ? 'btn-secondary' : 'btn-primary'} admin-only" onclick="togglePagoInvitado('${i.id}')" title="${isPagado ? 'Pagado' : 'Pagar'}">
+                ${isPagado ? '✅' : '❌'}
+              </button>
+              <button class="swipe-action-btn btn-secondary admin-only" onclick="openModalInvitado('${i.id}')" title="Editar">✏️</button>
+              <button class="swipe-action-btn btn-danger admin-only" onclick="deleteInvitado('${i.id}')" title="Eliminar">🗑️</button>
+            </div>
+          </div>
         </td>
+
+        <!-- CELDAS DESKTOP TRADICIONALES -->
+        <td class="desktop-only"><strong>${escapeHTML(i.nombre)}</strong></td>
         <td class="desktop-only">${anfitrion ? escapeHTML(anfitrion.nombre) : 'Desconocido'}</td>
         <td class="desktop-only">${modalidadLabels[i.modalidad] || i.modalidad}</td>
         <td class="desktop-only">${escapeHTML(i.detalleDia || '-')}</td>
         <td class="desktop-only"><strong>${i.importe} €</strong></td>
         <td class="desktop-only">
-          <span class="badge ${isPagado ? 'badge-success' : 'badge-warning'}">
-            ${isPagado ? '✅ Pagado' : '⏳ Falta por Pagar'}
+          <span class="badge ${isPagado ? 'badge-success' : 'badge-danger'}">
+            ${isPagado ? '✅ Pagado' : '❌ Falta por Pagar'}
           </span>
         </td>
-        <td class="text-right">
+        <td class="text-right desktop-only">
           ${currentUser ? `
             <button class="${isPagado ? 'btn-secondary' : 'btn-primary'} btn-sm admin-only" onclick="togglePagoInvitado('${i.id}')">
-              ${isPagado ? '✅ Pagado' : '⏳ Pagar'}
+              ${isPagado ? '✅ Pagado' : '❌ Pagar'}
             </button>
             <button class="btn-secondary btn-sm admin-only" onclick="openModalInvitado('${i.id}')">✏️</button>
             <button class="btn-danger btn-sm admin-only" onclick="deleteInvitado('${i.id}')">🗑️</button>
-          ` : `<span class="badge ${isPagado ? 'badge-success' : 'badge-warning'}">${isPagado ? '✅ Pagado' : '⏳ Pendiente'}</span>`}
+          ` : `<span class="badge ${isPagado ? 'badge-success' : 'badge-danger'}">${isPagado ? '✅ Pagado' : '❌ Sin Pagar'}</span>`}
         </td>
       </tr>
     `;
@@ -796,10 +887,38 @@ function renderGastos() {
     return `
       <tr>
         <td class="desktop-only"><strong>${index + 1}</strong></td>
-        <td>
-          <div class="item-title"><strong>${escapeHTML(g.concepto)}</strong></div>
-          <div class="item-sub text-muted">${escapeHTML(pagadoPorText)} • <span class="text-danger" style="font-weight:700;">${g.importe} €</span></div>
+        
+        <!-- VISTA MÓVIL: Tarjeta Blanca Limpia con Swipe Deslizable a la Izquierda -->
+        <td class="mobile-only-cell">
+          <div class="ios-swipe-row">
+            <div class="ios-swipe-body">
+              <div class="ios-swipe-main">
+                <strong class="ios-swipe-title">${escapeHTML(g.concepto)}</strong>
+                <div class="ios-swipe-sub">
+                  <span class="badge ${isAprobado ? 'badge-success' : 'badge-warning'}" style="font-size: 0.72rem; padding: 2px 6px;">
+                    ${isAprobado ? '✅ Aprobado' : '⏳ Pendiente'}
+                  </span>
+                  <span style="font-size:0.75rem; color:#64748b;">• ${escapeHTML(pagadoPorText)}</span>
+                </div>
+              </div>
+
+              <div class="ios-swipe-price">
+                <strong class="text-danger" style="font-size: 1.05rem;">${g.importe} €</strong>
+              </div>
+            </div>
+
+            <div class="ios-swipe-actions">
+              <button class="swipe-action-btn ${isAprobado ? 'btn-secondary' : 'btn-primary'} admin-only" onclick="toggleEstadoGasto('${g.id}')" title="${isAprobado ? 'Aprobado' : 'Aprobar'}">
+                ${isAprobado ? '✅' : '⏳'}
+              </button>
+              <button class="swipe-action-btn btn-secondary admin-only" onclick="openModalGasto('${g.id}')" title="Editar">✏️</button>
+              <button class="swipe-action-btn btn-danger admin-only" onclick="deleteGasto('${g.id}')" title="Eliminar">🗑️</button>
+            </div>
+          </div>
         </td>
+
+        <!-- CELDAS DESKTOP TRADICIONALES -->
+        <td class="desktop-only"><strong>${escapeHTML(g.concepto)}</strong></td>
         <td class="desktop-only">${catLabels[g.categoria] || g.categoria}</td>
         <td class="desktop-only"><strong class="text-danger">${g.importe} €</strong></td>
         <td class="desktop-only">${escapeHTML(pagadoPorText)}</td>
@@ -808,7 +927,7 @@ function renderGastos() {
             ${isAprobado ? '✅ Pagado' : '⏳ Falta por Pagar'}
           </span>
         </td>
-        <td class="text-right">
+        <td class="text-right desktop-only">
           ${currentUser ? `
             <button class="${isAprobado ? 'btn-secondary' : 'btn-primary'} btn-sm admin-only" onclick="toggleEstadoGasto('${g.id}')">
               ${isAprobado ? '✅ Pagado' : '⏳ Pagar'}

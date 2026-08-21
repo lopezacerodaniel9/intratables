@@ -211,16 +211,25 @@ body.authenticated .ios-session-banner {
   }
 
   /* Ocultar elementos exclusivos de móvil en PC */
-  .ios-tab-bar {
+  .ios-tab-bar,
+  .ios-drag-handle,
+  .item-sub,
+  .mobile-only-cell,
+  .compra-swipe-row,
+  .ios-swipe-row {
     display: none !important;
   }
 
-  .ios-drag-handle {
-    display: none !important;
+  .desktop-only {
+    display: table-cell !important;
   }
 
-  .item-sub {
-    display: none !important;
+  th.desktop-only {
+    display: table-cell !important;
+  }
+
+  td.desktop-only {
+    display: table-cell !important;
   }
 
   /* Header tipo Excel PC */
@@ -729,81 +738,150 @@ body.authenticated .ios-session-banner {
     font-weight: 700;
   }
 
-  /* TABLA MÓVIL DIVIDIDA EN COLUMNAS SENCILLAS PARA COMPRAS COMUNES */
-  #tab-compras-comunes .ios-table-card {
-    background: #ffffff !important;
-    border-radius: 14px !important;
-    padding: 10px !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04) !important;
-    border: 0.5px solid var(--ios-border) !important;
+  /* TABLA MÓVIL: VISTA TARJETA BLANCA Y SWIPE-LEFT FLUIDO EN COMPRAS, PEÑISTAS Y GASTOS EXTRAS */
+  .mobile-only-cell {
+    display: block !important;
+    width: 100% !important;
+    padding: 0 !important;
+    border: none !important;
   }
 
-  #tab-compras-comunes .data-table,
-  #tab-compras-comunes .data-table tbody,
-  #tab-compras-comunes .data-table tr,
-  #tab-compras-comunes .data-table td,
-  #tab-compras-comunes .data-table th {
-    display: table-cell !important;
-    width: auto !important;
+  #tbody-compras, #tbody-socios, #tbody-invitados, #tbody-gastos {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    width: 100% !important;
   }
 
-  #tab-compras-comunes .data-table thead {
-    display: table-header-group !important;
-  }
-
-  #tab-compras-comunes .data-table tbody {
-    display: table-row-group !important;
-  }
-
-  #tab-compras-comunes .data-table tr {
-    display: table-row !important;
+  #tbody-compras tr, #tbody-socios tr, #tbody-invitados tr, #tbody-gastos tr {
+    display: block !important;
     background: transparent !important;
     border: none !important;
     box-shadow: none !important;
     padding: 0 !important;
     margin: 0 !important;
+    width: 100% !important;
   }
 
-  #tab-compras-comunes .data-table th {
-    padding: 8px 6px !important;
-    font-size: 0.76rem !important;
-    font-weight: 800 !important;
-    color: #475569 !important;
-    text-transform: uppercase !important;
-    border-bottom: 2px solid #cbd5e1 !important;
-    background: #f8fafc !important;
-    text-align: left !important;
+  #tab-compras-comunes .ios-table-card,
+  #tab-socios .ios-table-card,
+  #tab-gastos-extras .ios-table-card {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    box-shadow: none !important;
   }
 
-  #tab-compras-comunes .data-table th.text-right {
-    text-align: right !important;
+  #tab-compras-comunes .data-table thead,
+  #tab-socios .data-table thead,
+  #tab-gastos-extras .data-table thead {
+    display: none !important;
   }
 
-  #tab-compras-comunes .data-table td {
-    padding: 10px 6px !important;
-    font-size: 0.85rem !important;
-    border-bottom: 1px solid #f1f5f9 !important;
-    vertical-align: middle !important;
+  /* Componente Swipe Deslizable Genérico */
+  .compra-swipe-row, .ios-swipe-row {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    border-radius: 14px;
+    background: #ffffff !important;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
+    border: 0.5px solid var(--ios-border);
+    width: 100%;
   }
 
-  #tab-compras-comunes .action-cell {
-    display: flex !important;
-    gap: 4px !important;
-    justify-content: flex-end !important;
-    align-items: center !important;
-    border-bottom: 1px solid #f1f5f9 !important;
-    padding: 10px 0 !important;
+  .compra-swipe-row::-webkit-scrollbar, .ios-swipe-row::-webkit-scrollbar {
+    display: none;
   }
 
-  #tab-compras-comunes .action-cell .btn-sm {
-    min-width: 32px !important;
-    height: 32px !important;
-    padding: 0 6px !important;
-    font-size: 0.88rem !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    border-radius: 8px !important;
+  .compra-swipe-body, .ios-swipe-body {
+    flex: 0 0 100%;
+    width: 100%;
+    scroll-snap-align: start;
+    padding: 12px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #ffffff;
+    box-sizing: border-box;
+  }
+
+  .compra-main-info, .ios-swipe-main {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .compra-name-title, .ios-swipe-title {
+    font-size: 0.96rem;
+    font-weight: 700;
+    color: #0f172a;
+  }
+
+  .compra-sub-info, .ios-swipe-sub {
+    font-size: 0.76rem;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .compra-qty-circle {
+    background: #f1f5f9;
+    color: #0f172a;
+    font-weight: 800;
+    font-size: 0.82rem;
+    padding: 2px 8px;
+    border-radius: 10px;
+    display: inline-block;
+    border: 0.5px solid #cbd5e1;
+  }
+
+  .compra-price-info, .ios-swipe-price {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+  }
+
+  .compra-total-val {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #16a34a;
+  }
+
+  .compra-unit-val {
+    font-size: 0.75rem;
+    color: #64748b;
+    font-weight: 600;
+  }
+
+  .compra-swipe-actions, .ios-swipe-actions {
+    flex: 0 0 auto;
+    scroll-snap-align: end;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    background: #f8fafc;
+    border-left: 1px solid #e2e8f0;
+  }
+
+  .swipe-action-btn {
+    border: none;
+    height: 40px;
+    min-width: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 0 10px;
+    font-weight: 700;
   }
 
   /* LISTADO MÓVIL COMPACTO CON ICONOS A LA DERECHA (PARA OTRAS SECCIONES) */
