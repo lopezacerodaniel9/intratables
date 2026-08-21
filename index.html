@@ -81,9 +81,9 @@
         <!-- iOS Metrics Grid -->
         <div class="ios-grid-metrics">
           <div class="ios-card metric-recaudado">
-            <div class="ios-card-label">💰 Total Recaudado</div>
+            <div class="ios-card-label">💰 Total Fondo & Recaudado</div>
             <div class="ios-card-value" id="val-recaudado">0 €</div>
-            <div class="ios-card-sub">Socios: <span id="val-recaudado-socios">0</span>€ | Invitados: <span id="val-recaudado-invitados">0</span>€</div>
+            <div class="ios-card-sub">Socios: <span id="val-recaudado-socios">0</span>€ | Invitados: <span id="val-recaudado-invitados">0</span>€ | Fondo año pasado: <span id="val-caja-anterior">0</span>€</div>
           </div>
 
           <div class="ios-card metric-gastado">
@@ -351,6 +351,10 @@
               <h2>⚙️ Cuotas y Tarifas</h2>
             </div>
             <form id="form-config-tarifas" class="ios-form">
+              <div class="ios-form-row">
+                <label>🏦 Caja / Fondo Ahorrado Año Pasado (€):</label>
+                <input type="number" id="cfg-caja-anterior" min="0" step="1" placeholder="Ej. 500">
+              </div>
               <div class="ios-form-row">
                 <label>Cuota Socio (€):</label>
                 <input type="number" id="cfg-cuota-socio" min="0" step="5">

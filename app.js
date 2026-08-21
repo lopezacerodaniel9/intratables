@@ -392,7 +392,10 @@ function renderMetrics() {
     .filter(i => i.estado === 'pagado')
     .reduce((acc, i) => acc + (Number(i.importe) || 0), 0);
 
-  const totalRecaudado = recaudadoSocios + recaudadoInvitados;
+  // Fondo / Caja Ahorrada del Año Pasado
+  const cajaAnteriores = Number(db.config.cajaAnteriores) || 0;
+
+  const totalRecaudado = recaudadoSocios + recaudadoInvitados + cajaAnteriores;
 
   // Compras Comunes Compradas
   const totalComprasIniciales = db.compras
@@ -433,6 +436,9 @@ function renderMetrics() {
   document.getElementById('val-recaudado').textContent = `${totalRecaudado.toLocaleString()} €`;
   document.getElementById('val-recaudado-socios').textContent = recaudadoSocios;
   document.getElementById('val-recaudado-invitados').textContent = recaudadoInvitados;
+  if (document.getElementById('val-caja-anterior')) {
+    document.getElementById('val-caja-anterior').textContent = cajaAnteriores;
+  }
 
   document.getElementById('val-gastado').textContent = `${totalGastado.toLocaleString()} €`;
 
@@ -818,6 +824,9 @@ function renderGastos() {
 
 // 6. Render Config
 function renderConfig() {
+  if (document.getElementById('cfg-caja-anterior')) {
+    document.getElementById('cfg-caja-anterior').value = db.config.cajaAnteriores || 0;
+  }
   document.getElementById('cfg-cuota-socio').value = db.config.cuotaSocio || 120;
   document.getElementById('cfg-total-corralon').value = db.config.totalCorralon || 800;
   document.getElementById('cfg-tarifa-dia').value = db.config.tarifaDia || 15;
@@ -1050,6 +1059,7 @@ function setupFormsAndModals() {
     e.preventDefault();
     if (!currentUser) return openModalAuth();
 
+    db.config.cajaAnteriores = Number(document.getElementById('cfg-caja-anterior').value) || 0;
     db.config.cuotaSocio = Number(document.getElementById('cfg-cuota-socio').value);
     db.config.totalCorralon = Number(document.getElementById('cfg-total-corralon').value);
     db.config.tarifaDia = Number(document.getElementById('cfg-tarifa-dia').value);
@@ -1057,7 +1067,8 @@ function setupFormsAndModals() {
     db.config.tarifaCompleto = Number(document.getElementById('cfg-tarifa-completo').value);
 
     saveData();
-    alert('✅ Tarifas actualizadas correctamente.');
+    renderAll();
+    alert('✅ Configuración y fondo ahorrado actualizados correctamente.');
   });
 
   // Export JSON
