@@ -1,6 +1,6 @@
-// Peña Los Intratables - Almodóvar del Campo App Logic (V10 - Únicamente Peñistas Socios: Daniel López, Daniel García, Antonio Horta)
+// Peña Los Intratables - Almodóvar del Campo App Logic (V11 - Tabla Móvil Limpia y Precio Individual de Producto)
 
-const STORAGE_KEY = 'intratables_peña_db_v10';
+const STORAGE_KEY = 'intratables_peña_db_v11';
 
 // Instancias globales de gráficos Chart.js
 let chartGastoCatInstance = null;
@@ -30,13 +30,13 @@ const DEFAULT_DATA = {
     { id: 'inv_1', nombre: 'Carlos (Amigo de Daniel)', anfitrionId: 'soc_1', modalidad: 'finde1', detalleDia: '1er Fin de Semana', importe: 35, estado: 'pagado' }
   ],
   compras: [
-    { id: 'cmp_1', nombre: 'Ron Ron Barceló', cantidad: '40 botellas (1L)', categoria: 'alcohol', precio: 540, estado: 'comprado' },
-    { id: 'cmp_2', nombre: 'Whisky Red Label', cantidad: '50 botellas (1L)', categoria: 'alcohol', precio: 670, estado: 'comprado' },
-    { id: 'cmp_3', nombre: 'Coca-Cola 2L (Packs 6)', cantidad: '300 botellas (2L)', categoria: 'refrescos', precio: 340, estado: 'comprado' },
-    { id: 'cmp_4', nombre: 'Ginebra Puerto de Indias', cantidad: '30 botellas (75CL)', categoria: 'alcohol', precio: 420, estado: 'pendiente' },
-    { id: 'cmp_5', nombre: 'Fanta Limón 2L (Packs 6)', cantidad: '200 botellas (2L)', categoria: 'refrescos', precio: 220, estado: 'pendiente' },
-    { id: 'cmp_6', nombre: 'Altavoz Potente Equipo Sonido Corralón', cantidad: '1 unidad (300W)', categoria: 'equipamiento', precio: 300, estado: 'comprado' },
-    { id: 'cmp_7', nombre: 'Alquiler Corralón (Reserva)', cantidad: 'Alquiler 10 días', categoria: 'corralon', precio: 800, estado: 'comprado' }
+    { id: 'cmp_1', nombre: 'Ron Barceló', cantidad: '50 botellas (1L)', precioUnitario: 13.45, precio: 672.50, categoria: 'alcohol', estado: 'comprado' },
+    { id: 'cmp_2', nombre: 'Whisky Red Label', cantidad: '50 botellas (1L)', precioUnitario: 13.40, precio: 670, categoria: 'alcohol', estado: 'comprado' },
+    { id: 'cmp_3', nombre: 'Coca-Cola 2L (Packs 6)', cantidad: '300 botellas (2L)', precioUnitario: 1.13, precio: 340, categoria: 'refrescos', estado: 'comprado' },
+    { id: 'cmp_4', nombre: 'Ginebra Puerto de Indias', cantidad: '30 botellas (75CL)', precioUnitario: 14.00, precio: 420, categoria: 'alcohol', estado: 'pendiente' },
+    { id: 'cmp_5', nombre: 'Fanta Limón 2L (Packs 6)', cantidad: '200 botellas (2L)', precioUnitario: 1.10, precio: 220, categoria: 'refrescos', estado: 'pendiente' },
+    { id: 'cmp_6', nombre: 'Altavoz Potente Equipo Sonido Corralón', cantidad: '1 unidad (300W)', precioUnitario: 300, precio: 300, categoria: 'equipamiento', estado: 'comprado' },
+    { id: 'cmp_7', nombre: 'Alquiler Corralón (Reserva)', cantidad: 'Alquiler 10 días', precioUnitario: 800, precio: 800, categoria: 'corralon', estado: 'comprado' }
   ],
   gastos: [
     { id: 'gst_1', concepto: 'Reposición urgente de hielos y 20 botellas 2L Coca-Cola', categoria: 'imprevisto_bebida', importe: 65, compradorId: 'soc_1', estado: 'aprobado' },
@@ -609,35 +609,36 @@ function renderCompras() {
     const isComprado = c.estado === 'comprado';
     const cantidadText = c.cantidad || '-';
     const pTotal = Number(c.precio || 0).toFixed(2);
-    const catLabel = catLabels[c.categoria] || c.categoria;
+    const pUnit = c.precioUnitario ? Number(c.precioUnitario).toFixed(2) + ' €/ud' : '-';
 
     return `
       <tr>
         <td class="desktop-only"><strong>${index + 1}</strong></td>
         <td>
-          <div class="item-title"><strong>${escapeHTML(c.nombre)}</strong></div>
-          <div class="item-sub text-muted" style="margin-top: 3px;">
-            <span class="badge badge-warning" style="font-size: 0.76rem; padding: 2px 6px;">📦 ${escapeHTML(cantidadText)}</span>
-            <span style="font-size: 0.78rem; margin-left: 4px;">${catLabel}</span>
-            <div style="margin-top: 3px; font-size: 0.88rem; font-weight: 700; color: #16a34a;">Importe: ${pTotal} €</div>
-          </div>
+          <strong class="item-title">${escapeHTML(c.nombre)}</strong>
         </td>
-        <td class="desktop-only"><span class="badge badge-warning" style="font-size: 0.85rem;">${escapeHTML(cantidadText)}</span></td>
-        <td class="desktop-only">${catLabel}</td>
-        <td class="desktop-only"><strong class="text-success" style="font-size: 0.95rem;">${pTotal} €</strong></td>
+        <td>
+          <span class="badge badge-warning" style="font-size: 0.78rem;">📦 ${escapeHTML(cantidadText)}</span>
+        </td>
+        <td>
+          <span style="font-size: 0.82rem; font-weight: 700; color: #475569;">${pUnit}</span>
+        </td>
+        <td>
+          <strong class="text-success" style="font-size: 0.95rem;">${pTotal} €</strong>
+        </td>
         <td class="desktop-only">
           <span class="badge ${isComprado ? 'badge-success' : 'badge-warning'}">
             ${isComprado ? '✅ Comprado' : '⏳ Pendiente'}
           </span>
         </td>
-        <td class="text-right">
+        <td class="text-right action-cell">
           ${currentUser ? `
-            <button class="${isComprado ? 'btn-secondary' : 'btn-primary'} btn-sm" onclick="toggleEstadoCompra('${c.id}')">
-              ${isComprado ? '✅ Comprado' : '⏳ Comprar'}
+            <button class="${isComprado ? 'btn-secondary' : 'btn-primary'} btn-sm" onclick="toggleEstadoCompra('${c.id}')" title="${isComprado ? 'Comprado' : 'Comprar'}">
+              ${isComprado ? '✅' : '⏳'}
             </button>
-            <button class="btn-secondary btn-sm admin-only" onclick="openModalCompra('${c.id}')">✏️</button>
-            <button class="btn-danger btn-sm admin-only" onclick="deleteCompra('${c.id}')">🗑️</button>
-          ` : `<span class="badge ${isComprado ? 'badge-success' : 'badge-warning'}">${isComprado ? '✅ Comprado' : '⏳ Pendiente'}</span>`}
+            <button class="btn-secondary btn-sm admin-only" onclick="openModalCompra('${c.id}')" title="Editar">✏️</button>
+            <button class="btn-danger btn-sm admin-only" onclick="deleteCompra('${c.id}')" title="Eliminar">🗑️</button>
+          ` : `<span class="badge ${isComprado ? 'badge-success' : 'badge-warning'}">${isComprado ? '✅' : '⏳'}</span>`}
         </td>
       </tr>
     `;
@@ -893,6 +894,23 @@ function setupFormsAndModals() {
     openModalCompra();
   });
 
+  // Auto-cálculo de precio total según unidades y precio individual
+  const inputQty = document.getElementById('compra-cantidad');
+  const inputUnit = document.getElementById('compra-precio-unitario');
+  const inputTotal = document.getElementById('compra-precio');
+
+  function autoCalcCompraTotal() {
+    const unitPrice = parseFloat(inputUnit?.value);
+    if (!isNaN(unitPrice) && unitPrice > 0) {
+      const match = inputQty?.value.match(/(\d+)/);
+      const qty = match ? parseInt(match[1], 10) : 1;
+      if (inputTotal) inputTotal.value = (unitPrice * qty).toFixed(2);
+    }
+  }
+
+  inputUnit?.addEventListener('input', autoCalcCompraTotal);
+  inputQty?.addEventListener('input', autoCalcCompraTotal);
+
   // Save Compra Común Form
   document.getElementById('form-compra').addEventListener('submit', e => {
     e.preventDefault();
@@ -901,16 +919,19 @@ function setupFormsAndModals() {
     const id = document.getElementById('compra-id').value;
     const nombre = document.getElementById('compra-nombre').value.trim();
     const cantidad = document.getElementById('compra-cantidad').value.trim();
+    const precioUnitario = Number(document.getElementById('compra-precio-unitario').value) || 0;
     const categoria = document.getElementById('compra-categoria').value;
     const precio = Number(document.getElementById('compra-precio').value) || 0;
     const estado = document.getElementById('compra-estado').value;
 
+    const itemData = { id, nombre, cantidad, precioUnitario, categoria, precio, estado };
+
     if (id) {
       const idx = db.compras.findIndex(c => c.id === id);
-      if (idx !== -1) db.compras[idx] = { id, nombre, cantidad, categoria, precio, estado };
+      if (idx !== -1) db.compras[idx] = itemData;
     } else {
       const newId = 'cmp_' + Date.now();
-      db.compras.push({ id: newId, nombre, cantidad, categoria, precio, estado });
+      db.compras.push({ ...itemData, id: newId });
     }
 
     saveData();
@@ -1106,6 +1127,7 @@ window.openModalCompra = function(id = null) {
       document.getElementById('compra-id').value = c.id;
       document.getElementById('compra-nombre').value = c.nombre;
       document.getElementById('compra-cantidad').value = c.cantidad || '';
+      document.getElementById('compra-precio-unitario').value = c.precioUnitario || '';
       document.getElementById('compra-categoria').value = c.categoria;
       document.getElementById('compra-precio').value = c.precio || 0;
       document.getElementById('compra-estado').value = c.estado;
@@ -1113,6 +1135,7 @@ window.openModalCompra = function(id = null) {
   } else {
     title.textContent = 'Añadir Compra Común';
     document.getElementById('compra-id').value = '';
+    document.getElementById('compra-precio-unitario').value = '';
     document.getElementById('compra-estado').value = 'comprado';
   }
 

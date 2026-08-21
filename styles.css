@@ -729,7 +729,84 @@ body.authenticated .ios-session-banner {
     font-weight: 700;
   }
 
-  /* LISTADO MÓVIL COMPACTO CON ICONOS A LA DERECHA */
+  /* TABLA MÓVIL DIVIDIDA EN COLUMNAS SENCILLAS PARA COMPRAS COMUNES */
+  #tab-compras-comunes .ios-table-card {
+    background: #ffffff !important;
+    border-radius: 14px !important;
+    padding: 10px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04) !important;
+    border: 0.5px solid var(--ios-border) !important;
+  }
+
+  #tab-compras-comunes .data-table,
+  #tab-compras-comunes .data-table tbody,
+  #tab-compras-comunes .data-table tr,
+  #tab-compras-comunes .data-table td,
+  #tab-compras-comunes .data-table th {
+    display: table-cell !important;
+    width: auto !important;
+  }
+
+  #tab-compras-comunes .data-table thead {
+    display: table-header-group !important;
+  }
+
+  #tab-compras-comunes .data-table tbody {
+    display: table-row-group !important;
+  }
+
+  #tab-compras-comunes .data-table tr {
+    display: table-row !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  #tab-compras-comunes .data-table th {
+    padding: 8px 6px !important;
+    font-size: 0.76rem !important;
+    font-weight: 800 !important;
+    color: #475569 !important;
+    text-transform: uppercase !important;
+    border-bottom: 2px solid #cbd5e1 !important;
+    background: #f8fafc !important;
+    text-align: left !important;
+  }
+
+  #tab-compras-comunes .data-table th.text-right {
+    text-align: right !important;
+  }
+
+  #tab-compras-comunes .data-table td {
+    padding: 10px 6px !important;
+    font-size: 0.85rem !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    vertical-align: middle !important;
+  }
+
+  #tab-compras-comunes .action-cell {
+    display: flex !important;
+    gap: 4px !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    padding: 10px 0 !important;
+  }
+
+  #tab-compras-comunes .action-cell .btn-sm {
+    min-width: 32px !important;
+    height: 32px !important;
+    padding: 0 6px !important;
+    font-size: 0.88rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 8px !important;
+  }
+
+  /* LISTADO MÓVIL COMPACTO CON ICONOS A LA DERECHA (PARA OTRAS SECCIONES) */
   .ios-table-card {
     background: transparent !important;
     border: none !important;
