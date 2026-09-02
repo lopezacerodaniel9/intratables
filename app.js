@@ -6,13 +6,18 @@ const STORAGE_KEY = 'intratables_peña_db_v12';
 const SUPABASE_URL = 'https://aourshrfzrrockzfptdh.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_OTTeiveW-h_btriwhzAh8w_Je9kln_t';
 
-let supabase = null;
-if (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY) {
+let supabaseInstance = null;
+function getSupabaseClient() {
+  if (supabaseInstance) return supabaseInstance;
   try {
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    if (typeof window !== 'undefined' && window.supabase && typeof window.supabase.createClient === 'function' && SUPABASE_URL && SUPABASE_ANON_KEY) {
+      supabaseInstance = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      return supabaseInstance;
+    }
   } catch (e) {
-    console.error('Error al inicializar cliente de Supabase:', e);
+    console.warn('Supabase client init error:', e);
   }
+  return null;
 }
 
 // Instancias globales de gráficos Chart.js
@@ -119,13 +124,14 @@ function showSyncStatus(msg, type = 'success') {
 }
 
 async function syncFromSupabase() {
-  if (!supabase) {
+  const client = getSupabaseClient();
+  if (!client) {
     showSyncStatus('Modo local (Copia guardada en el dispositivo)', 'error');
     return;
   }
   try {
     showSyncStatus('Conectando con la nube...', 'syncing');
-    const { data, error } = await supabase
+    const { data, error } = await client
       .from('intratables_db')
       .select('content')
       .eq('id', 'main_peña_db')
@@ -146,7 +152,6 @@ async function syncFromSupabase() {
       renderAll();
       showSyncStatus('Conectado en tiempo real con Supabase');
     } else if (!data) {
-      // Si la fila aún no existe en Supabase, subimos los datos iniciales
       await pushToSupabase();
     }
   } catch (err) {
@@ -156,9 +161,10 @@ async function syncFromSupabase() {
 }
 
 function subscribeRealtime() {
-  if (!supabase) return;
+  const client = getSupabaseClient();
+  if (!client) return;
   try {
-    supabase
+    client
       .channel('public:intratables_db')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'intratables_db' }, payload => {
         if (payload.new && payload.new.content) {
@@ -176,12 +182,13 @@ function subscribeRealtime() {
 
 let pushTimeout = null;
 async function pushToSupabase() {
-  if (!supabase) return;
+  const client = getSupabaseClient();
+  if (!client) return;
   showSyncStatus('Guardando cambios en la nube...', 'syncing');
   clearTimeout(pushTimeout);
   pushTimeout = setTimeout(async () => {
     try {
-      const { error } = await supabase
+      const { error } = await client
         .from('intratables_db')
         .upsert({ id: 'main_peña_db', content: db, updated_at: new Date().toISOString() });
 
