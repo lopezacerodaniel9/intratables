@@ -131,18 +131,27 @@ async function syncFromSupabase() {
       .eq('id', 'main_peña_db')
       .maybeSingle();
 
+    if (error) {
+      if (error.code === '42P01' || (error.message && error.message.includes('does not exist'))) {
+        showSyncStatus('⚠️ Pendiente: Crear la tabla intratables_db en Supabase SQL Editor', 'error');
+      } else {
+        showSyncStatus('⚠️ Sin conexión a la nube - Usando datos locales', 'error');
+      }
+      return;
+    }
+
     if (data && data.content) {
       db = data.content;
       saveDataLocalOnly();
       renderAll();
       showSyncStatus('Conectado en tiempo real con Supabase');
     } else if (!data) {
-      // Si la fila aún no existe en Supabase, subimos los datos por defecto
+      // Si la fila aún no existe en Supabase, subimos los datos iniciales
       await pushToSupabase();
     }
   } catch (err) {
     console.warn('Sync inicial Supabase:', err);
-    showSyncStatus('Modo local activo', 'error');
+    showSyncStatus('Modo local activo (Localstorage)', 'error');
   }
 }
 
@@ -178,7 +187,11 @@ async function pushToSupabase() {
 
       if (error) {
         console.error('Error al enviar a Supabase:', error);
-        showSyncStatus('Error de conexión a la nube', 'error');
+        if (error.code === '42P01' || (error.message && error.message.includes('does not exist'))) {
+          showSyncStatus('⚠️ Pendiente: Ejecutar SQL en Supabase (Tabla no creada)', 'error');
+        } else {
+          showSyncStatus('⚠️ Error de conexión a la nube - Guardado en local', 'error');
+        }
       } else {
         showSyncStatus('Sincronizado en tiempo real con Supabase');
       }
