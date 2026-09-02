@@ -22,6 +22,8 @@
   
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Supabase JS CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="ios-app read-only">
   <div class="app-container">
@@ -45,6 +47,11 @@
       <!-- User Active Session Banner -->
       <div id="session-banner" class="ios-session-banner">
         <span>👁️ Modo Lectura (Sin inicio de sesión)</span>
+      </div>
+
+      <!-- Live Supabase Sync Status Banner -->
+      <div id="sync-status-banner" style="background: #f0fdf4; color: #166534; padding: 4px 12px; border-radius: 8px; font-size: 0.78rem; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px; margin: 6px 0; border: 1px solid #bbf7d0;">
+        <span id="sync-status-icon">☁️</span> <span id="sync-status-text">Conectado a la nube en tiempo real</span>
       </div>
 
       <!-- iOS Countdown Banner -->

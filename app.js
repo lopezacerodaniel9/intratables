@@ -1,6 +1,19 @@
-// Peña Los Intratables - Almodóvar del Campo App Logic (V12 - Cuota Base Alquiler + Tramos de Alcohol para Peñistas)
+// Peña Los Intratables - Almodóvar del Campo App Logic (V12 - Sincronización en Tiempo Real con Supabase)
 
 const STORAGE_KEY = 'intratables_peña_db_v12';
+
+// Configuración del Servidor en la Nube Supabase
+const SUPABASE_URL = 'https://aourshrfzrrockzfptdh.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_OTTeiveW-h_btriwhzAh8w_Je9kln_t';
+
+let supabase = null;
+if (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY) {
+  try {
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  } catch (e) {
+    console.error('Error al inicializar cliente de Supabase:', e);
+  }
+}
 
 // Instancias globales de gráficos Chart.js
 let chartGastoCatInstance = null;
@@ -43,8 +56,7 @@ const DEFAULT_DATA = {
     { id: 'cmp_7', nombre: 'Alquiler Corralón (Reserva)', cantidad: 'Alquiler 10 días', precioUnitario: 800, precio: 800, categoria: 'corralon', estado: 'comprado' }
   ],
   gastos: [
-    { id: 'gst_1', concepto: 'Reposición urgente de hielos y 20 botellas 2L Coca-Cola', categoria: 'imprevisto_bebida', importe: 65, compradorId: 'soc_1', estado: 'aprobado' },
-    { id: 'gst_2', concepto: 'Paquete extra 500 vasos plástico y servilletas', categoria: 'imprevisto_menaje', importe: 25, compradorId: 'soc_2', estado: 'aprobado' }
+    { id: 'gst_1', concepto: 'Hielos de emergencia Noche 1', categoria: 'imprevisto_bebida', importe: 45, compradorId: 'soc_1', estado: 'aprobado' }
   ]
 };
 
@@ -66,9 +78,115 @@ function loadData() {
   return JSON.parse(JSON.stringify(DEFAULT_DATA));
 }
 
+function saveDataLocalOnly() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+  } catch (e) {
+    console.error('Error al guardar LocalStorage:', e);
+  }
+}
+
 function saveData() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+  saveDataLocalOnly();
   renderAll();
+  pushToSupabase();
+}
+
+function showSyncStatus(msg, type = 'success') {
+  const icon = document.getElementById('sync-status-icon');
+  const text = document.getElementById('sync-status-text');
+  const banner = document.getElementById('sync-status-banner');
+  if (!icon || !text || !banner) return;
+
+  text.textContent = msg;
+
+  if (type === 'syncing') {
+    icon.textContent = '🔄';
+    banner.style.background = '#e0f2fe';
+    banner.style.color = '#0369a1';
+    banner.style.borderColor = '#bae6fd';
+  } else if (type === 'error') {
+    icon.textContent = '⚠️';
+    banner.style.background = '#fef2f2';
+    banner.style.color = '#b91c1c';
+    banner.style.borderColor = '#fecaca';
+  } else {
+    icon.textContent = '☁️';
+    banner.style.background = '#f0fdf4';
+    banner.style.color = '#166534';
+    banner.style.borderColor = '#bbf7d0';
+  }
+}
+
+async function syncFromSupabase() {
+  if (!supabase) {
+    showSyncStatus('Modo local (Copia guardada en el dispositivo)', 'error');
+    return;
+  }
+  try {
+    showSyncStatus('Conectando con la nube...', 'syncing');
+    const { data, error } = await supabase
+      .from('intratables_db')
+      .select('content')
+      .eq('id', 'main_peña_db')
+      .maybeSingle();
+
+    if (data && data.content) {
+      db = data.content;
+      saveDataLocalOnly();
+      renderAll();
+      showSyncStatus('Conectado en tiempo real con Supabase');
+    } else if (!data) {
+      // Si la fila aún no existe en Supabase, subimos los datos por defecto
+      await pushToSupabase();
+    }
+  } catch (err) {
+    console.warn('Sync inicial Supabase:', err);
+    showSyncStatus('Modo local activo', 'error');
+  }
+}
+
+function subscribeRealtime() {
+  if (!supabase) return;
+  try {
+    supabase
+      .channel('public:intratables_db')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'intratables_db' }, payload => {
+        if (payload.new && payload.new.content) {
+          db = payload.new.content;
+          saveDataLocalOnly();
+          renderAll();
+          showSyncStatus('Actualizado por un compañero en tiempo real');
+        }
+      })
+      .subscribe();
+  } catch (err) {
+    console.error('Error al suscribirse a Realtime:', err);
+  }
+}
+
+let pushTimeout = null;
+async function pushToSupabase() {
+  if (!supabase) return;
+  showSyncStatus('Guardando cambios en la nube...', 'syncing');
+  clearTimeout(pushTimeout);
+  pushTimeout = setTimeout(async () => {
+    try {
+      const { error } = await supabase
+        .from('intratables_db')
+        .upsert({ id: 'main_peña_db', content: db, updated_at: new Date().toISOString() });
+
+      if (error) {
+        console.error('Error al enviar a Supabase:', error);
+        showSyncStatus('Error de conexión a la nube', 'error');
+      } else {
+        showSyncStatus('Sincronizado en tiempo real con Supabase');
+      }
+    } catch (err) {
+      console.error('Excepción al enviar a Supabase:', err);
+      showSyncStatus('Modo local activo', 'error');
+    }
+  }, 300);
 }
 
 function loadSession() {
@@ -102,6 +220,10 @@ document.addEventListener('DOMContentLoaded', () => {
   startCountdownTimer();
   updateAuthUI();
   renderAll();
+  
+  // Sincronización Nube en Tiempo Real con Supabase
+  syncFromSupabase();
+  subscribeRealtime();
 });
 
 // Navigation Tabs
