@@ -1,6 +1,6 @@
-// Peña Los Intratables - Almodóvar del Campo App Logic (V11 - Tabla Móvil Limpia y Precio Individual de Producto)
+// Peña Los Intratables - Almodóvar del Campo App Logic (V12 - Cuota Base Alquiler + Tramos de Alcohol para Peñistas)
 
-const STORAGE_KEY = 'intratables_peña_db_v11';
+const STORAGE_KEY = 'intratables_peña_db_v12';
 
 // Instancias globales de gráficos Chart.js
 let chartGastoCatInstance = null;
@@ -9,7 +9,11 @@ let chartPresupuestoVsRealInstance = null;
 // Datos por defecto exclusivamente con los 3 peñistas socios autorizados
 const DEFAULT_DATA = {
   config: {
-    cuotaSocio: 120,
+    cuotaBaseCorralon: 80,
+    tramoAlcoholCompleto: 50,
+    tramoAlcoholFinde: 30,
+    tramoAlcoholDia: 15,
+    cajaAnteriores: 0,
     totalCorralon: 800,
     tarifaDia: 15,
     tarifaFinde: 35,
@@ -22,9 +26,9 @@ const DEFAULT_DATA = {
     { id: 'usr_3', nombre: 'Antonio Horta', usuario: 'antonio.horta', clave: 'admin1234', rol: 'admin' }
   ],
   socios: [
-    { id: 'soc_1', nombre: 'Daniel López', cuota: 120, pagado: 120 },
-    { id: 'soc_2', nombre: 'Daniel García', cuota: 120, pagado: 120 },
-    { id: 'soc_3', nombre: 'Antonio Horta', cuota: 120, pagado: 120 }
+    { id: 'soc_1', nombre: 'Daniel López', cuotaBase: 80, tramoAlcohol: 'completo', diasSueltos: 0, cuota: 130, pagado: 130 },
+    { id: 'soc_2', nombre: 'Daniel García', cuotaBase: 80, tramoAlcohol: 'completo', diasSueltos: 0, cuota: 130, pagado: 130 },
+    { id: 'soc_3', nombre: 'Antonio Horta', cuotaBase: 80, tramoAlcohol: 'completo', diasSueltos: 0, cuota: 130, pagado: 130 }
   ],
   invitados: [
     { id: 'inv_1', nombre: 'Carlos (Amigo de Daniel)', anfitrionId: 'soc_1', modalidad: 'finde1', detalleDia: '1er Fin de Semana', importe: 35, estado: 'pagado' }
@@ -685,6 +689,20 @@ function renderCompras() {
   }).join('');
 }
 
+function calcularCuotaSocio(s) {
+  const base = Number(s.cuotaBase !== undefined ? s.cuotaBase : (db.config.cuotaBaseCorralon || 80));
+  let extra = 0;
+  if (s.tramoAlcohol === 'completo') {
+    extra = Number(db.config.tramoAlcoholCompleto !== undefined ? db.config.tramoAlcoholCompleto : 50);
+  } else if (s.tramoAlcohol === 'finde') {
+    extra = Number(db.config.tramoAlcoholFinde !== undefined ? db.config.tramoAlcoholFinde : 30);
+  } else if (s.tramoAlcohol === 'dia') {
+    const dias = Number(s.diasSueltos || 1);
+    extra = (Number(db.config.tramoAlcoholDia !== undefined ? db.config.tramoAlcoholDia : 15)) * dias;
+  }
+  return base + extra;
+}
+
 // 3. Render Socios
 let socioFilter = 'todos';
 let socioSearchQuery = '';
@@ -692,6 +710,8 @@ let socioSearchQuery = '';
 function renderSocios() {
   const tbody = document.getElementById('tbody-socios');
   let list = db.socios.filter(s => {
+    const cuotaTotal = calcularCuotaSocio(s);
+    s.cuota = cuotaTotal;
     const matchSearch = s.nombre.toLowerCase().includes(socioSearchQuery.toLowerCase());
     const pendiente = (s.cuota - s.pagado) > 0;
     if (socioFilter === 'pendiente') return matchSearch && pendiente;
@@ -700,13 +720,24 @@ function renderSocios() {
   });
 
   if (list.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7" class="empty-msg">No se encontraron peñistas.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" class="empty-msg">No se encontraron peñistas.</td></tr>`;
     return;
   }
 
+  const tramoLabels = {
+    completo: '🌟 Fiestas Completas (+50€)',
+    finde: '🎟️ Fin de Semana (+30€)',
+    dia: '🎫 Días Sueltos',
+    ninguno: '🚫 Solo Alquiler (+0€)'
+  };
+
   tbody.innerHTML = list.map((s, index) => {
+    const cuotaTotal = calcularCuotaSocio(s);
+    s.cuota = cuotaTotal;
     const pend = s.cuota - s.pagado;
     const isPagado = pend <= 0;
+    const cuotaBaseVal = s.cuotaBase !== undefined ? s.cuotaBase : (db.config.cuotaBaseCorralon || 80);
+    const tramoLabelText = s.tramoAlcohol === 'dia' ? `🎫 ${s.diasSueltos || 1}d sueltos` : (tramoLabels[s.tramoAlcohol] || '🌟 Fiestas Completas');
 
     return `
       <tr>
@@ -722,12 +753,13 @@ function renderSocios() {
                   <span class="badge ${isPagado ? 'badge-success' : 'badge-danger'}" style="font-size: 0.72rem; padding: 2px 6px;">
                     ${isPagado ? '✅ Pagado' : '❌ Falta ' + pend + '€'}
                   </span>
-                  <span style="font-size:0.75rem; color:#64748b;">👈 Desliza para acciones</span>
+                  <span style="font-size:0.75rem; color:#64748b;">• ${tramoLabelText}</span>
                 </div>
               </div>
 
               <div class="ios-swipe-price">
-                <strong class="${isPagado ? 'text-success' : 'text-danger'}" style="font-size: 1.05rem;">${s.pagado} / ${s.cuota} €</strong>
+                <strong class="${isPagado ? 'text-success' : 'text-danger'}" style="font-size: 1.05rem;">${s.pagado} / ${cuotaTotal} €</strong>
+                <span style="font-size: 0.72rem; color: #64748b;">Base: ${cuotaBaseVal}€</span>
               </div>
             </div>
 
@@ -743,7 +775,9 @@ function renderSocios() {
 
         <!-- CELDAS DESKTOP TRADICIONALES -->
         <td class="desktop-only"><strong>${escapeHTML(s.nombre)}</strong></td>
-        <td class="desktop-only">${s.cuota} €</td>
+        <td class="desktop-only">${cuotaBaseVal} €</td>
+        <td class="desktop-only">${tramoLabelText}</td>
+        <td class="desktop-only"><strong class="text-main">${cuotaTotal} €</strong></td>
         <td class="desktop-only text-success">${s.pagado} €</td>
         <td class="desktop-only"><span class="badge ${isPagado ? 'badge-success' : 'badge-danger'}">${isPagado ? '✅ Pagado' : '❌ Falta por Pagar'}</span></td>
         <td class="text-right desktop-only">
@@ -946,7 +980,18 @@ function renderConfig() {
   if (document.getElementById('cfg-caja-anterior')) {
     document.getElementById('cfg-caja-anterior').value = db.config.cajaAnteriores || 0;
   }
-  document.getElementById('cfg-cuota-socio').value = db.config.cuotaSocio || 120;
+  if (document.getElementById('cfg-cuota-base-corralon')) {
+    document.getElementById('cfg-cuota-base-corralon').value = db.config.cuotaBaseCorralon || 80;
+  }
+  if (document.getElementById('cfg-tramo-completo')) {
+    document.getElementById('cfg-tramo-completo').value = db.config.tramoAlcoholCompleto || 50;
+  }
+  if (document.getElementById('cfg-tramo-finde')) {
+    document.getElementById('cfg-tramo-finde').value = db.config.tramoAlcoholFinde || 30;
+  }
+  if (document.getElementById('cfg-tramo-dia')) {
+    document.getElementById('cfg-tramo-dia').value = db.config.tramoAlcoholDia || 15;
+  }
   document.getElementById('cfg-total-corralon').value = db.config.totalCorralon || 800;
   document.getElementById('cfg-tarifa-dia').value = db.config.tarifaDia || 15;
   document.getElementById('cfg-tarifa-finde').value = db.config.tarifaFinde || 35;
@@ -1072,6 +1117,32 @@ function setupFormsAndModals() {
     openModalSocio();
   });
 
+  // Auto-cálculo de cuota de peñista (Cuota Base Corralón + Tramo de Alcohol)
+  const inputSocioBase = document.getElementById('socio-cuota-base');
+  const selectSocioTramo = document.getElementById('socio-tramo-alcohol');
+  const inputSocioDias = document.getElementById('socio-dias-sueltos');
+  const groupSocioDias = document.getElementById('group-socio-dias');
+  const inputSocioCuota = document.getElementById('socio-cuota');
+
+  function autoRecalcSocioCuota() {
+    const tramo = selectSocioTramo?.value;
+    if (groupSocioDias) {
+      groupSocioDias.style.display = tramo === 'dia' ? 'block' : 'none';
+    }
+    const tempSocio = {
+      cuotaBase: Number(inputSocioBase?.value) || (db.config.cuotaBaseCorralon || 80),
+      tramoAlcohol: tramo,
+      diasSueltos: Number(inputSocioDias?.value) || 1
+    };
+    if (inputSocioCuota) {
+      inputSocioCuota.value = calcularCuotaSocio(tempSocio);
+    }
+  }
+
+  inputSocioBase?.addEventListener('input', autoRecalcSocioCuota);
+  selectSocioTramo?.addEventListener('change', autoRecalcSocioCuota);
+  inputSocioDias?.addEventListener('input', autoRecalcSocioCuota);
+
   // Save Socio Form
   document.getElementById('form-socio').addEventListener('submit', e => {
     e.preventDefault();
@@ -1079,15 +1150,20 @@ function setupFormsAndModals() {
 
     const id = document.getElementById('socio-id').value;
     const nombre = document.getElementById('socio-nombre').value.trim();
-    const cuota = Number(document.getElementById('socio-cuota').value);
+    const cuotaBase = Number(document.getElementById('socio-cuota-base').value) || (db.config.cuotaBaseCorralon || 80);
+    const tramoAlcohol = document.getElementById('socio-tramo-alcohol').value;
+    const diasSueltos = Number(document.getElementById('socio-dias-sueltos').value) || 1;
+    const cuota = Number(document.getElementById('socio-cuota').value) || calcularCuotaSocio({ cuotaBase, tramoAlcohol, diasSueltos });
     const pagado = Number(document.getElementById('socio-pagado').value);
+
+    const socioData = { id, nombre, cuotaBase, tramoAlcohol, diasSueltos, cuota, pagado };
 
     if (id) {
       const idx = db.socios.findIndex(s => s.id === id);
-      if (idx !== -1) db.socios[idx] = { id, nombre, cuota, pagado };
+      if (idx !== -1) db.socios[idx] = socioData;
     } else {
       const newId = 'soc_' + Date.now();
-      db.socios.push({ id: newId, nombre, cuota, pagado });
+      db.socios.push({ ...socioData, id: newId });
     }
 
     saveData();
@@ -1179,7 +1255,10 @@ function setupFormsAndModals() {
     if (!currentUser) return openModalAuth();
 
     db.config.cajaAnteriores = Number(document.getElementById('cfg-caja-anterior').value) || 0;
-    db.config.cuotaSocio = Number(document.getElementById('cfg-cuota-socio').value);
+    db.config.cuotaBaseCorralon = Number(document.getElementById('cfg-cuota-base-corralon').value) || 80;
+    db.config.tramoAlcoholCompleto = Number(document.getElementById('cfg-tramo-completo').value) || 50;
+    db.config.tramoAlcoholFinde = Number(document.getElementById('cfg-tramo-finde').value) || 30;
+    db.config.tramoAlcoholDia = Number(document.getElementById('cfg-tramo-dia').value) || 15;
     db.config.totalCorralon = Number(document.getElementById('cfg-total-corralon').value);
     db.config.tarifaDia = Number(document.getElementById('cfg-tarifa-dia').value);
     db.config.tarifaFinde = Number(document.getElementById('cfg-tarifa-finde').value);
@@ -1187,7 +1266,7 @@ function setupFormsAndModals() {
 
     saveData();
     renderAll();
-    alert('✅ Configuración y fondo ahorrado actualizados correctamente.');
+    alert('✅ Configuración de cuotas, tramos de alcohol y fondo ahorrado actualizados correctamente.');
   });
 
   // Export JSON
@@ -1297,20 +1376,35 @@ window.openModalSocio = function(id = null) {
   const title = document.getElementById('modal-socio-title');
   document.getElementById('form-socio').reset();
 
+  const baseConfig = db.config.cuotaBaseCorralon || 80;
+  const extraConfig = db.config.tramoAlcoholCompleto || 50;
+
   if (id) {
     const s = db.socios.find(item => item.id === id);
     if (s) {
       title.textContent = 'Editar Peñista';
       document.getElementById('socio-id').value = s.id;
       document.getElementById('socio-nombre').value = s.nombre;
-      document.getElementById('socio-cuota').value = s.cuota;
-      document.getElementById('socio-pagado').value = s.pagado;
+      document.getElementById('socio-cuota-base').value = s.cuotaBase !== undefined ? s.cuotaBase : baseConfig;
+      document.getElementById('socio-tramo-alcohol').value = s.tramoAlcohol || 'completo';
+      document.getElementById('socio-dias-sueltos').value = s.diasSueltos || 1;
+      document.getElementById('socio-cuota').value = s.cuota || calcularCuotaSocio(s);
+      document.getElementById('socio-pagado').value = s.pagado || 0;
     }
   } else {
     title.textContent = 'Añadir Peñista';
     document.getElementById('socio-id').value = '';
-    document.getElementById('socio-cuota').value = db.config.cuotaSocio || 120;
-    document.getElementById('socio-pagado').value = 0;
+    document.getElementById('socio-cuota-base').value = baseConfig;
+    document.getElementById('socio-tramo-alcohol').value = 'completo';
+    document.getElementById('socio-dias-sueltos').value = 1;
+    document.getElementById('socio-cuota').value = baseConfig + extraConfig;
+    document.getElementById('socio-pagado').value = baseConfig + extraConfig;
+  }
+
+  const tramoSelect = document.getElementById('socio-tramo-alcohol');
+  const groupDias = document.getElementById('group-socio-dias');
+  if (groupDias && tramoSelect) {
+    groupDias.style.display = tramoSelect.value === 'dia' ? 'block' : 'none';
   }
 
   modal.classList.add('active');

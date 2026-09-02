@@ -18,7 +18,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20260821">
+  <link rel="stylesheet" href="styles.css?v=20260902">
   
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -243,9 +243,11 @@
               <table class="data-table ios-table">
                 <thead>
                   <tr>
-                    <th>#</th>
+                    <th class="desktop-only">#</th>
                     <th>Nombre Peñista</th>
-                    <th>Cuota Asignada</th>
+                    <th>Cuota Base Alquiler</th>
+                    <th>Tramo Alcohol</th>
+                    <th>Cuota Total</th>
                     <th>Importe Pagado</th>
                     <th>Estado Pago</th>
                     <th class="text-right">Acciones</th>
@@ -356,8 +358,20 @@
                 <input type="number" id="cfg-caja-anterior" min="0" step="1" placeholder="Ej. 500">
               </div>
               <div class="ios-form-row">
-                <label>Cuota Socio (€):</label>
-                <input type="number" id="cfg-cuota-socio" min="0" step="5">
+                <label>🏠 Cuota Base Alquiler Corralón para Peñistas (€):</label>
+                <input type="number" id="cfg-cuota-base-corralon" min="0" step="5" placeholder="Ej. 80 o 70">
+              </div>
+              <div class="ios-form-row">
+                <label>🍷 Tramo Alcohol - Fiestas Completas (€):</label>
+                <input type="number" id="cfg-tramo-completo" min="0" step="5" placeholder="Ej. 50">
+              </div>
+              <div class="ios-form-row">
+                <label>🍷 Tramo Alcohol - Fin de Semana (€):</label>
+                <input type="number" id="cfg-tramo-finde" min="0" step="5" placeholder="Ej. 30">
+              </div>
+              <div class="ios-form-row">
+                <label>🍷 Tramo Alcohol - Día Suelto (€/día):</label>
+                <input type="number" id="cfg-tramo-dia" min="0" step="1" placeholder="Ej. 15">
               </div>
               <div class="ios-form-row">
                 <label>Alquiler Corralón (€):</label>
@@ -513,8 +527,25 @@
           <input type="text" id="socio-nombre" required placeholder="Ej. Daniel Lacero">
         </div>
         <div class="form-group">
-          <label>Cuota Asignada (€):</label>
-          <input type="number" id="socio-cuota" required min="0" step="5">
+          <label>Cuota Base Alquiler Corralón (€):</label>
+          <input type="number" id="socio-cuota-base" required min="0" step="5" placeholder="80">
+        </div>
+        <div class="form-group">
+          <label>Tramo de Consumo / Alcohol:</label>
+          <select id="socio-tramo-alcohol" required>
+            <option value="completo">🌟 Fiestas Completas (Total 10 días)</option>
+            <option value="finde">🎟️ Un Fin de Semana (V-S-D)</option>
+            <option value="dia">🎫 Días Sueltos</option>
+            <option value="ninguno">🚫 Solo Alquiler / Sin Bebida</option>
+          </select>
+        </div>
+        <div class="form-group" id="group-socio-dias" style="display: none;">
+          <label>Número de días sueltos:</label>
+          <input type="number" id="socio-dias-sueltos" min="1" step="1" value="1">
+        </div>
+        <div class="form-group">
+          <label>Cuota Total Calculada (€):</label>
+          <input type="number" id="socio-cuota" required min="0" step="5" readonly style="background: #f1f5f9; font-weight: 700; color: #0284c7;">
         </div>
         <div class="form-group">
           <label>Importe Ya Pagado (€):</label>
@@ -695,6 +726,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=20260821"></script>
+  <script src="app.js?v=20260902"></script>
 </body>
 </html>
