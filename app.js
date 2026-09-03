@@ -1,6 +1,6 @@
 // Peña Los Intratables - Almodóvar del Campo App Logic (V12 - Sincronización en Tiempo Real con Supabase)
 
-const STORAGE_KEY = 'intratables_peña_db_v14';
+const STORAGE_KEY = 'intratables_peña_db_v15';
 
 // Configuración del Servidor en la Nube Supabase
 const SUPABASE_URL = 'https://aourshrfzrrockzfptdh.supabase.co';
@@ -44,9 +44,9 @@ const DEFAULT_DATA = {
     { id: 'usr_3', nombre: 'Antonio Horta', usuario: 'antonio.horta', clave: 'admin1234', rol: 'admin' }
   ],
   socios: [
-    { id: 'soc_1', nombre: 'Dani (Daniel López)', cuotaBase: 80, tramoAlcohol: 'completo', diasSueltos: 0, cuota: 130, pagado: 130 },
-    { id: 'soc_2', nombre: 'Dani G (Daniel García)', cuotaBase: 80, tramoAlcohol: 'completo', diasSueltos: 0, cuota: 130, pagado: 130 },
-    { id: 'soc_3', nombre: 'Horta (Antonio Horta)', cuotaBase: 80, tramoAlcohol: 'completo', diasSueltos: 0, cuota: 130, pagado: 130 },
+    { id: 'soc_1', nombre: 'Dani (Daniel López)', cuotaBase: 80, tramoAlcohol: 'completo', diasSueltos: 0, cuota: 130, pagado: 0 },
+    { id: 'soc_2', nombre: 'Dani G (Daniel García)', cuotaBase: 80, tramoAlcohol: 'completo', diasSueltos: 0, cuota: 130, pagado: 0 },
+    { id: 'soc_3', nombre: 'Horta (Antonio Horta)', cuotaBase: 80, tramoAlcohol: 'completo', diasSueltos: 0, cuota: 130, pagado: 0 },
     { id: 'soc_4', nombre: 'Jorgele', cuotaBase: 80, tramoAlcohol: 'completo', diasSueltos: 0, cuota: 130, pagado: 0 },
     { id: 'soc_5', nombre: 'Elena', cuotaBase: 80, tramoAlcohol: 'completo', diasSueltos: 0, cuota: 130, pagado: 0 },
     { id: 'soc_6', nombre: 'Miriam', cuotaBase: 80, tramoAlcohol: 'completo', diasSueltos: 0, cuota: 130, pagado: 0 },
