@@ -1,6 +1,6 @@
 // Peña Los Intratables - Almodóvar del Campo App Logic (V12 - Sincronización en Tiempo Real con Supabase)
 
-const STORAGE_KEY = 'intratables_peña_db_v12';
+const STORAGE_KEY = 'intratables_peña_db_v13';
 
 // Configuración del Servidor en la Nube Supabase
 const SUPABASE_URL = 'https://aourshrfzrrockzfptdh.supabase.co';
@@ -24,7 +24,7 @@ function getSupabaseClient() {
 let chartGastoCatInstance = null;
 let chartPresupuestoVsRealInstance = null;
 
-// Datos por defecto exclusivamente con los 3 peñistas socios autorizados
+// Datos por defecto con los peñistas socios e invitados oficiales de la peña
 const DEFAULT_DATA = {
   config: {
     cuotaBaseCorralon: 80,
@@ -44,12 +44,45 @@ const DEFAULT_DATA = {
     { id: 'usr_3', nombre: 'Antonio Horta', usuario: 'antonio.horta', clave: 'admin1234', rol: 'admin' }
   ],
   socios: [
-    { id: 'soc_1', nombre: 'Daniel López', cuotaBase: 80, tramoAlcohol: 'completo', diasSueltos: 0, cuota: 130, pagado: 130 },
-    { id: 'soc_2', nombre: 'Daniel García', cuotaBase: 80, tramoAlcohol: 'completo', diasSueltos: 0, cuota: 130, pagado: 130 },
-    { id: 'soc_3', nombre: 'Antonio Horta', cuotaBase: 80, tramoAlcohol: 'completo', diasSueltos: 0, cuota: 130, pagado: 130 }
+    { id: 'soc_1', nombre: 'Dani (Daniel López)', cuotaBase: 80, tramoAlcohol: 'completo', diasSueltos: 0, cuota: 130, pagado: 130 },
+    { id: 'soc_2', nombre: 'Dani G (Daniel García)', cuotaBase: 80, tramoAlcohol: 'completo', diasSueltos: 0, cuota: 130, pagado: 130 },
+    { id: 'soc_3', nombre: 'Horta (Antonio Horta)', cuotaBase: 80, tramoAlcohol: 'completo', diasSueltos: 0, cuota: 130, pagado: 130 },
+    { id: 'soc_4', nombre: 'Jorgele', cuotaBase: 80, tramoAlcohol: 'completo', diasSueltos: 0, cuota: 130, pagado: 0 },
+    { id: 'soc_5', nombre: 'Elena', cuotaBase: 80, tramoAlcohol: 'completo', diasSueltos: 0, cuota: 130, pagado: 0 },
+    { id: 'soc_6', nombre: 'Miriam', cuotaBase: 80, tramoAlcohol: 'completo', diasSueltos: 0, cuota: 130, pagado: 0 },
+    { id: 'soc_7', nombre: 'Nuria', cuotaBase: 80, tramoAlcohol: 'completo', diasSueltos: 0, cuota: 130, pagado: 0 },
+    { id: 'soc_8', nombre: 'Josito', cuotaBase: 80, tramoAlcohol: 'completo', diasSueltos: 0, cuota: 130, pagado: 0 },
+    { id: 'soc_9', nombre: 'Bea', cuotaBase: 80, tramoAlcohol: 'completo', diasSueltos: 0, cuota: 130, pagado: 0 },
+    { id: 'soc_10', nombre: 'Sergio', cuotaBase: 80, tramoAlcohol: 'completo', diasSueltos: 0, cuota: 130, pagado: 0 },
+    { id: 'soc_11', nombre: 'Barbero', cuotaBase: 80, tramoAlcohol: 'completo', diasSueltos: 0, cuota: 130, pagado: 0 },
+    { id: 'soc_12', nombre: 'Clau', cuotaBase: 80, tramoAlcohol: 'completo', diasSueltos: 0, cuota: 130, pagado: 0 },
+    { id: 'soc_13', nombre: 'Miguel L', cuotaBase: 80, tramoAlcohol: 'completo', diasSueltos: 0, cuota: 130, pagado: 0 },
+    { id: 'soc_14', nombre: 'Paula', cuotaBase: 80, tramoAlcohol: 'completo', diasSueltos: 0, cuota: 130, pagado: 0 },
+    { id: 'soc_15', nombre: 'Alba', cuotaBase: 80, tramoAlcohol: 'completo', diasSueltos: 0, cuota: 130, pagado: 0 },
+    { id: 'soc_16', nombre: 'Elías', cuotaBase: 80, tramoAlcohol: 'completo', diasSueltos: 0, cuota: 130, pagado: 0 },
+    { id: 'soc_17', nombre: 'Nuria (2)', cuotaBase: 80, tramoAlcohol: 'completo', diasSueltos: 0, cuota: 130, pagado: 0 },
+    { id: 'soc_18', nombre: 'María G', cuotaBase: 80, tramoAlcohol: 'completo', diasSueltos: 0, cuota: 130, pagado: 0 },
+    { id: 'soc_19', nombre: 'María M', cuotaBase: 80, tramoAlcohol: 'completo', diasSueltos: 0, cuota: 130, pagado: 0 },
+    { id: 'soc_20', nombre: 'Mario', cuotaBase: 80, tramoAlcohol: 'completo', diasSueltos: 0, cuota: 130, pagado: 0 },
+    { id: 'soc_21', nombre: 'Raquel', cuotaBase: 80, tramoAlcohol: 'completo', diasSueltos: 0, cuota: 130, pagado: 0 },
+    { id: 'soc_22', nombre: 'Miguel S', cuotaBase: 80, tramoAlcohol: 'completo', diasSueltos: 0, cuota: 130, pagado: 0 },
+    { id: 'soc_23', nombre: 'Cachi', cuotaBase: 80, tramoAlcohol: 'completo', diasSueltos: 0, cuota: 130, pagado: 0 },
+    { id: 'soc_24', nombre: 'Laura', cuotaBase: 80, tramoAlcohol: 'completo', diasSueltos: 0, cuota: 130, pagado: 0 },
+    { id: 'soc_25', nombre: 'Robles', cuotaBase: 80, tramoAlcohol: 'completo', diasSueltos: 0, cuota: 130, pagado: 0 },
+    { id: 'soc_26', nombre: 'Irene', cuotaBase: 80, tramoAlcohol: 'finde', diasSueltos: 0, cuota: 110, pagado: 0 }
   ],
   invitados: [
-    { id: 'inv_1', nombre: 'Carlos (Amigo de Daniel)', anfitrionId: 'soc_1', modalidad: 'finde1', detalleDia: '1er Fin de Semana', importe: 35, estado: 'pagado' }
+    { id: 'inv_1', nombre: 'Amiga 1 de Miriam', anfitrionId: 'soc_6', modalidad: 'finde1', detalleDia: '1er Fin de Semana', importe: 35, estado: 'pendiente' },
+    { id: 'inv_2', nombre: 'Amiga 2 de Miriam', anfitrionId: 'soc_6', modalidad: 'finde1', detalleDia: '1er Fin de Semana', importe: 35, estado: 'pendiente' },
+    { id: 'inv_3', nombre: 'Sergio (Invitado)', anfitrionId: '', modalidad: 'finde1', detalleDia: '1er Fin de Semana', importe: 35, estado: 'pendiente' },
+    { id: 'inv_4', nombre: 'Marina', anfitrionId: '', modalidad: 'finde1', detalleDia: '1er Fin de Semana', importe: 35, estado: 'pendiente' },
+    { id: 'inv_5', nombre: 'Candela', anfitrionId: '', modalidad: 'finde1', detalleDia: '1er Fin de Semana', importe: 35, estado: 'pendiente' },
+    { id: 'inv_6', nombre: 'Ángel', anfitrionId: '', modalidad: 'finde1', detalleDia: '1er Fin de Semana', importe: 35, estado: 'pendiente' },
+    { id: 'inv_7', nombre: 'Tamara', anfitrionId: '', modalidad: 'dia', detalleDia: 'Los dos sábados (2 días)', importe: 30, estado: 'pendiente' },
+    { id: 'inv_8', nombre: 'Loro', anfitrionId: '', modalidad: 'dia', detalleDia: 'Sábados noche y Jueves (3 días)', importe: 45, estado: 'pendiente' },
+    { id: 'inv_9', nombre: 'María (Por confirmar días)', anfitrionId: '', modalidad: 'dia', detalleDia: 'Pendiente confirmar días', importe: 15, estado: 'pendiente' },
+    { id: 'inv_10', nombre: 'Luis 🐎', anfitrionId: '', modalidad: 'dia', detalleDia: 'Por confirmar', importe: 15, estado: 'pendiente' },
+    { id: 'inv_11', nombre: 'Ana', anfitrionId: '', modalidad: 'dia', detalleDia: 'Día suelto', importe: 15, estado: 'pendiente' }
   ],
   compras: [
     { id: 'cmp_1', nombre: 'Ron Barceló', cantidad: '50 botellas (1L)', precioUnitario: 13.45, precio: 672.50, categoria: 'alcohol', estado: 'comprado' },
