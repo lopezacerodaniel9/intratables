@@ -210,6 +210,20 @@ async function syncFromSupabase() {
         shouldPush = true;
       }
 
+      // Forzar limpieza de pruebas antiguas (reset de cobros iniciales a 0 € y caja anterior a 0 €)
+      if (db.socios && db.socios.some(s => s.pagado > 0)) {
+        db.socios.forEach(s => s.pagado = 0);
+        shouldPush = true;
+      }
+      if (db.invitados && db.invitados.some(i => i.estado === 'pagado')) {
+        db.invitados.forEach(i => i.estado = 'pendiente');
+        shouldPush = true;
+      }
+      if (db.config && Number(db.config.cajaAnteriores) > 0) {
+        db.config.cajaAnteriores = 0;
+        shouldPush = true;
+      }
+
       if (shouldPush) {
         await pushToSupabase();
       } else {
@@ -1759,6 +1773,16 @@ window.restaurarListaOficial = function() {
   db.compras = JSON.parse(JSON.stringify(DEFAULT_DATA.compras));
   saveData();
   alert('✅ Lista oficial de Peñistas, Invitados y Compras del año pasado cargada y sincronizada en tiempo real.');
+};
+
+window.reiniciarCobrosAZero = function() {
+  if (confirm('¿Resetear todos los cobranzas a 0,00 € para empezar de cero?')) {
+    db.socios.forEach(s => s.pagado = 0);
+    db.invitados.forEach(i => i.estado = 'pendiente');
+    db.config.cajaAnteriores = 0;
+    saveData();
+    alert('✅ Cobranzas reseteadas a 0,00 € y sincronizadas en la nube.');
+  }
 };
 
 // Utils

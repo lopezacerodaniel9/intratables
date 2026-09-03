@@ -412,6 +412,7 @@
               </label>
               <input type="file" id="input-import-json" accept=".json" style="display: none;">
               <button onclick="restaurarListaOficial()" class="ios-pill-btn admin-only" style="background: #0284c7; color: #ffffff; font-weight: 700;">🔄 Cargar Lista Oficial (26 Peñistas + 11 Invitados)</button>
+              <button onclick="reiniciarCobrosAZero()" class="ios-pill-btn admin-only" style="background: #e11d48; color: #ffffff; font-weight: 700;">🧹 Resetear Todos los Pagos a 0 €</button>
               <button id="btn-reset-data" class="ios-btn-danger admin-only">⚠️ Resetear Datos Prueba</button>
             </div>
           </div>
@@ -734,6 +735,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=20260903-excel-purchases"></script>
+  <script src="app.js?v=20260903-clean-payments"></script>
 </body>
 </html>
