@@ -1,6 +1,6 @@
 // Peña Los Intratables - Almodóvar del Campo App Logic (V12 - Sincronización en Tiempo Real con Supabase)
 
-const STORAGE_KEY = 'intratables_peña_db_v13';
+const STORAGE_KEY = 'intratables_peña_db_v14';
 
 // Configuración del Servidor en la Nube Supabase
 const SUPABASE_URL = 'https://aourshrfzrrockzfptdh.supabase.co';
@@ -85,13 +85,25 @@ const DEFAULT_DATA = {
     { id: 'inv_11', nombre: 'Ana', anfitrionId: '', modalidad: 'dia', detalleDia: 'Día suelto', importe: 15, estado: 'pendiente' }
   ],
   compras: [
-    { id: 'cmp_1', nombre: 'Ron Barceló', cantidad: '50 botellas (1L)', precioUnitario: 13.45, precio: 672.50, categoria: 'alcohol', estado: 'comprado' },
-    { id: 'cmp_2', nombre: 'Whisky Red Label', cantidad: '50 botellas (1L)', precioUnitario: 13.40, precio: 670, categoria: 'alcohol', estado: 'comprado' },
-    { id: 'cmp_3', nombre: 'Coca-Cola 2L (Packs 6)', cantidad: '300 botellas (2L)', precioUnitario: 1.13, precio: 340, categoria: 'refrescos', estado: 'comprado' },
-    { id: 'cmp_4', nombre: 'Ginebra Puerto de Indias', cantidad: '30 botellas (75CL)', precioUnitario: 14.00, precio: 420, categoria: 'alcohol', estado: 'pendiente' },
-    { id: 'cmp_5', nombre: 'Fanta Limón 2L (Packs 6)', cantidad: '200 botellas (2L)', precioUnitario: 1.10, precio: 220, categoria: 'refrescos', estado: 'pendiente' },
-    { id: 'cmp_6', nombre: 'Altavoz Potente Equipo Sonido Corralón', cantidad: '1 unidad (300W)', precioUnitario: 300, precio: 300, categoria: 'equipamiento', estado: 'comprado' },
-    { id: 'cmp_7', nombre: 'Alquiler Corralón (Reserva)', cantidad: 'Alquiler 10 días', precioUnitario: 800, precio: 800, categoria: 'corralon', estado: 'comprado' }
+    { id: 'cmp_1', nombre: 'Vasos', cantidad: '70 paquetes / vasos', precioUnitario: 1.00, precio: 70.00, categoria: 'equipamiento', estado: 'comprado' },
+    { id: 'cmp_2', nombre: 'Negrita 1L', cantidad: '12 botellas (1L)', precioUnitario: 12.55, precio: 150.60, categoria: 'alcohol', estado: 'comprado' },
+    { id: 'cmp_3', nombre: 'Larios 1,5L', cantidad: '8 botellas (1.5L)', precioUnitario: 18.10, precio: 144.80, categoria: 'alcohol', estado: 'comprado' },
+    { id: 'cmp_4', nombre: 'Barceló 0,7L', cantidad: '15 botellas (0.7L)', precioUnitario: 14.95, precio: 224.25, categoria: 'alcohol', estado: 'comprado' },
+    { id: 'cmp_5', nombre: 'Brugal 1L', cantidad: '4 botellas (1L)', precioUnitario: 17.60, precio: 70.40, categoria: 'alcohol', estado: 'comprado' },
+    { id: 'cmp_6', nombre: 'Dyc 1L', cantidad: '12 botellas (1L)', precioUnitario: 12.65, precio: 151.80, categoria: 'alcohol', estado: 'comprado' },
+    { id: 'cmp_7', nombre: 'Red Label 1L', cantidad: '10 botellas (1L)', precioUnitario: 18.45, precio: 184.50, categoria: 'alcohol', estado: 'comprado' },
+    { id: 'cmp_8', nombre: 'Larios Rosa 0,7L', cantidad: '7 botellas (0.7L)', precioUnitario: 13.45, precio: 94.15, categoria: 'alcohol', estado: 'comprado' },
+    { id: 'cmp_9', nombre: 'Beefeater 1,5L', cantidad: '6 botellas (1.5L)', precioUnitario: 17.95, precio: 107.70, categoria: 'alcohol', estado: 'comprado' },
+    { id: 'cmp_10', nombre: 'Malibu 0,7L', cantidad: '6 botellas (0.7L)', precioUnitario: 11.50, precio: 69.00, categoria: 'alcohol', estado: 'comprado' },
+    { id: 'cmp_11', nombre: 'Coca-Cola (Packs x4)', cantidad: '10 packs (x4)', precioUnitario: 7.36, precio: 73.60, categoria: 'refrescos', estado: 'comprado' },
+    { id: 'cmp_12', nombre: 'Fanta Naranja (Packs x4)', cantidad: '5 packs (x4)', precioUnitario: 6.00, precio: 30.00, categoria: 'refrescos', estado: 'comprado' },
+    { id: 'cmp_13', nombre: 'Fanta Limón (Packs x4)', cantidad: '5 packs (x4)', precioUnitario: 6.00, precio: 30.00, categoria: 'refrescos', estado: 'comprado' },
+    { id: 'cmp_14', nombre: 'Nestea', cantidad: '6 unidades', precioUnitario: 1.85, precio: 11.10, categoria: 'refrescos', estado: 'comprado' },
+    { id: 'cmp_15', nombre: 'Sprite', cantidad: '3 unidades', precioUnitario: 1.35, precio: 4.05, categoria: 'refrescos', estado: 'comprado' },
+    { id: 'cmp_16', nombre: 'Puerto de Indias Mora 0,7L', cantidad: '2 botellas (0.7L)', precioUnitario: 15.95, precio: 31.90, categoria: 'alcohol', estado: 'comprado' },
+    { id: 'cmp_17', nombre: 'Tinto de Verano', cantidad: '18 botellas', precioUnitario: 1.50, precio: 20.00, categoria: 'refrescos', estado: 'comprado' },
+    { id: 'cmp_18', nombre: 'Cerveza (Cajas/Barriles)', cantidad: 'Varias cajas/barriles', precioUnitario: 445.00, precio: 445.00, categoria: 'refrescos', estado: 'comprado' },
+    { id: 'cmp_19', nombre: 'Hielos Peña', cantidad: 'Bolsas de hielo', precioUnitario: 100.00, precio: 100.00, categoria: 'refrescos', estado: 'comprado' }
   ],
   gastos: [
     { id: 'gst_1', concepto: 'Hielos de emergencia Noche 1', categoria: 'imprevisto_bebida', importe: 45, compradorId: 'soc_1', estado: 'aprobado' }
@@ -107,7 +119,9 @@ function loadData() {
   if (saved) {
     try {
       const data = JSON.parse(saved);
-      if (!data.compras) data.compras = JSON.parse(JSON.stringify(DEFAULT_DATA.compras));
+      if (!data.compras || data.compras.length < 15) {
+        data.compras = JSON.parse(JSON.stringify(DEFAULT_DATA.compras));
+      }
       if (!data.socios || data.socios.length < 26) {
         data.socios = JSON.parse(JSON.stringify(DEFAULT_DATA.socios));
         data.invitados = JSON.parse(JSON.stringify(DEFAULT_DATA.invitados));
@@ -185,9 +199,18 @@ async function syncFromSupabase() {
 
     if (data && data.content) {
       db = data.content;
+      let shouldPush = false;
       if (!db.socios || db.socios.length < 26) {
         db.socios = JSON.parse(JSON.stringify(DEFAULT_DATA.socios));
         db.invitados = JSON.parse(JSON.stringify(DEFAULT_DATA.invitados));
+        shouldPush = true;
+      }
+      if (!db.compras || db.compras.length < 15) {
+        db.compras = JSON.parse(JSON.stringify(DEFAULT_DATA.compras));
+        shouldPush = true;
+      }
+
+      if (shouldPush) {
         await pushToSupabase();
       } else {
         saveDataLocalOnly();
@@ -1733,8 +1756,9 @@ window.deleteGasto = function(id) {
 window.restaurarListaOficial = function() {
   db.socios = JSON.parse(JSON.stringify(DEFAULT_DATA.socios));
   db.invitados = JSON.parse(JSON.stringify(DEFAULT_DATA.invitados));
+  db.compras = JSON.parse(JSON.stringify(DEFAULT_DATA.compras));
   saveData();
-  alert('✅ Lista oficial de 26 Peñistas y 11 Invitados restaurada y sincronizada en tiempo real.');
+  alert('✅ Lista oficial de Peñistas, Invitados y Compras del año pasado cargada y sincronizada en tiempo real.');
 };
 
 // Utils
