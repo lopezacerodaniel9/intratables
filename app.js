@@ -108,6 +108,10 @@ function loadData() {
     try {
       const data = JSON.parse(saved);
       if (!data.compras) data.compras = JSON.parse(JSON.stringify(DEFAULT_DATA.compras));
+      if (!data.socios || data.socios.length < 26) {
+        data.socios = JSON.parse(JSON.stringify(DEFAULT_DATA.socios));
+        data.invitados = JSON.parse(JSON.stringify(DEFAULT_DATA.invitados));
+      }
       return data;
     } catch (e) {
       console.error('Error al cargar LocalStorage:', e);
@@ -181,8 +185,14 @@ async function syncFromSupabase() {
 
     if (data && data.content) {
       db = data.content;
-      saveDataLocalOnly();
-      renderAll();
+      if (!db.socios || db.socios.length < 26) {
+        db.socios = JSON.parse(JSON.stringify(DEFAULT_DATA.socios));
+        db.invitados = JSON.parse(JSON.stringify(DEFAULT_DATA.invitados));
+        await pushToSupabase();
+      } else {
+        saveDataLocalOnly();
+        renderAll();
+      }
       showSyncStatus('Conectado en tiempo real con Supabase');
     } else if (!data) {
       await pushToSupabase();
@@ -1718,6 +1728,13 @@ window.deleteGasto = function(id) {
     db.gastos = db.gastos.filter(g => g.id !== id);
     saveData();
   }
+};
+
+window.restaurarListaOficial = function() {
+  db.socios = JSON.parse(JSON.stringify(DEFAULT_DATA.socios));
+  db.invitados = JSON.parse(JSON.stringify(DEFAULT_DATA.invitados));
+  saveData();
+  alert('✅ Lista oficial de 26 Peñistas y 11 Invitados restaurada y sincronizada en tiempo real.');
 };
 
 // Utils
